@@ -36,8 +36,8 @@ Rooms.prototype = {
         roomInput.style.marginLeft = "25px";
 
         roomInput.addEventListener('change', function(event) {
-          console.log(roomInput.value);
-          window.location.hash = roomInput.value;
+          SF.go(roomInput.value);
+          window.location.reload();
         }, false);
 
 
