@@ -26,7 +26,7 @@ Rooms.prototype = {
       var container = this.container;
       container.style.visibility = 'hidden';
 
-      socket.emit('list-rooms', function(room_list) {
+      SF.socket().emit('list-rooms', function(room_list) {
         container.innerHTML = '';
 
         var newRoom = document.createElement('div');

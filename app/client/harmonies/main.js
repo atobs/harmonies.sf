@@ -552,14 +552,14 @@ function onMenuBG() {
     isBackground = false;
 
     window.CONTEXT = fgcanvas.getContext("2d");
-    brush.context = context;
+    brush.context = window.CONTEXT;
     document.getElementById("bg-layer").className = "button";
     bgcanvas.style.opacity = "0.5";
     fgcanvas.style.opacity = "1";
   } else {
     isBackground = true;
     window.CONTEXT = bgcanvas.getContext("2d");
-    brush.context = context;
+    brush.context = window.CONTEXT;
     document.getElementById("bg-layer").className = "button selected";
 
     fgcanvas.style.opacity = "0.5";

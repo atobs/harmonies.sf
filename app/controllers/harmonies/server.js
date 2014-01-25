@@ -17,6 +17,7 @@ var _fgColors = { };
 var _bgColors = { };
 var _users = {};
 
+var socketMod = require_core("server/socket");
 
 // This is an implementation of the Fisher-Yates algorithm, taken from
 // http://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
@@ -49,13 +50,18 @@ module.exports = {
       if (data && data.coords && data.coords.length >= 1) {
         data.user_id = _user_id;
 
-        socket.socket.room(_room).send('stroke', data);
+        socket.spark.room(_room).send('stroke', data);
         _strokes[_room].push(data);
       }
     });
 
+    var updateInterval = setInterval(function() {
+      if (_fgColors[_room]) {
+        socket.emit('new-fgcolor', _fgColors[_room]);
+      }
+    }, 10000);
+
     socket.on('join', function(data) {
-      console.log("JOINING ROOM", data);
       _room = data.room || "#default";
       if (!_strokes[_room]) {
         _strokes[_room] = [];
@@ -70,7 +76,7 @@ module.exports = {
       _fgColors[_room][_user_id] = [0,0,0];
 
 
-      socket.socket.join(_room);
+      socket.spark.join(_room);
       socket.emit('clear');
 
       if (_bgColors[_room]) {
@@ -79,7 +85,7 @@ module.exports = {
 
       if (_fgColors[_room]) {
         socket.emit('new-fgcolor', _fgColors[_room]);
-        socket.socket.room(_room).send('new-fgcolor', _fgColors[_room]);
+        socket.spark.room(_room).send('new-fgcolor', _fgColors[_room]);
       }
 
 
@@ -90,7 +96,7 @@ module.exports = {
 
     socket.on('new-bgcolor', function(data){
       if (data){
-        socket.socket.room(_room).send('new-bgcolor', data);
+        socket.spark.room(_room).send('new-bgcolor', data);
         _bgColors[_room] = data;
       }
     });
@@ -99,11 +105,11 @@ module.exports = {
       _fgColors[_room][_user_id] = data;
 
       socket.emit('new-fgcolor', _fgColors[_room]);
-      socket.socket.room(_room).send('new-fgcolor', _fgColors[_room]);
+      socket.spark.room(_room).send('new-fgcolor', _fgColors[_room]);
     });
 
     socket.on('clear', function() {
-      socket.socket.room(_room).send('clear');
+      socket.spark.room(_room).send('clear');
       _strokes[_room] = [];
     });
 
@@ -119,7 +125,7 @@ module.exports = {
       callback(rooms.slice(0, 3));
     });
 
-    socket.on('disconnect', function() {
+    socket.spark.on('end', function() {
       if (_fgColors[_room] && _fgColors[_room][_user_id]) {
         delete _fgColors[_room][_user_id];
       }
@@ -128,7 +134,8 @@ module.exports = {
         delete _users[_user_id];
       }
 
-      socket.socket.broadcast.send('new-fgcolor', _fgColors[_room]);
+
+      clearInterval(updateInterval);
     });
   }
 };
