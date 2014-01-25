@@ -47,6 +47,8 @@ module.exports = {
 
   index: function(ctx, api) {
     api.template.add_stylesheet("harmonies.css");
+    var room = ctx.req.params.id || "#default";
+    api.bridge.controller("harmonies", "set_room", room);
     api.page.render({ socket: true, content: "" });
   },
 
@@ -105,6 +107,7 @@ module.exports = {
     }, 10000);
 
     socket.on('join', function(data) {
+      console.log("JOINING", data);
       _room = data.room || "#default";
       if (!_strokes[_room]) {
         _strokes[_room] = [];

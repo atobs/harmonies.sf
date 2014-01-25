@@ -2,10 +2,16 @@ var room = window.location.hash || "#default";
 
 module.exports = {
 
+  set_room: function(new_room) {
+    var self = this;
+    room = new_room;
+  },
+
   install: function(socket) {
+    this.socket = socket;
 
     socket.emit('join', {
-        room: room.toLowerCase()
+      room: room.toLowerCase()
     });
 
     var userBrushes = {};
