@@ -35,12 +35,6 @@ Rooms.prototype = {
         roomInput.setAttribute('type', 'text');
         roomInput.style.marginLeft = "25px";
 
-        roomInput.addEventListener('change', function(event) {
-          SF.go(roomInput.value);
-          window.location.reload();
-        }, false);
-
-
         newRoom.appendChild(roomInput);
         container.appendChild(newRoom);
 
@@ -52,7 +46,8 @@ Rooms.prototype = {
 
           room_list.forEach(function(room) {
             var href = document.createElement("a");
-            href.setAttribute("href", room);
+            var room_url = '/h/' + room;
+            href.setAttribute("href", room_url);
             href.innerHTML = room + "<br />";
             container.appendChild(href);
             container.style.visibility = 'visible';
