@@ -12,7 +12,7 @@ function getID() {
   return _id;
 }
 
-var _strokes = { "#default" : []};
+var _strokes = { "default" : []};
 var _fgColors = { };
 var _bgColors = { };
 var _users = {};
@@ -47,7 +47,7 @@ module.exports = {
 
   index: function(ctx, api) {
     api.template.add_stylesheet("harmonies.css");
-    var room = ctx.req.params.id || "#default";
+    var room = ctx.req.params.id || "default";
     api.bridge.controller("harmonies", "set_room", room);
     api.page.render({ socket: true, content: "" });
   },
@@ -88,7 +88,7 @@ module.exports = {
 
   socket: function(socket) {
     var _user_id = getID();
-    var _room = "#default";
+    var _room = "default";
 
     socket.on('stroke', function (data) {
       if (data && data.coords && data.coords.length >= 1) {
@@ -108,7 +108,7 @@ module.exports = {
 
     socket.on('join', function(data) {
       console.log("JOINING", data);
-      _room = data.room || "#default";
+      _room = data.room || "default";
       if (!_strokes[_room]) {
         _strokes[_room] = [];
       }
