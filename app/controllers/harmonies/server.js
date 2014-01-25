@@ -59,7 +59,6 @@ module.exports = {
 
     var read_only = version !== room_version;
 
-    console.log("ROOM", room, "V", version, "RV", room_version, "RO", read_only);
     api.bridge.controller("harmonies", "set_room", room, version, read_only);
     api.page.render({ socket: true, content: "" });
   },
@@ -99,8 +98,13 @@ module.exports = {
   socket: function(socket) {
     var _user_id = getID();
     var _room = "default";
+    var _writer = false;
 
     socket.on('stroke', function (data) {
+      if (!_writer) {
+        return;
+      }
+
       if (data && data.coords && data.coords.length >= 1) {
         data.user_id = _user_id;
 
@@ -117,6 +121,7 @@ module.exports = {
     }, 10000);
 
     socket.on('join', function(data) {
+      _writer = true;
       _room = data.room || "default";
       if (!_strokes[_room]) {
         _strokes[_room] = [];
@@ -161,6 +166,9 @@ module.exports = {
     });
 
     socket.on('new-bgcolor', function(data){
+      if (!_writer) {
+        return;
+      }
       if (data){
         socket.spark.room(_room).send('new-bgcolor', data);
         _bgColors[_room] = data;
@@ -168,19 +176,33 @@ module.exports = {
     });
 
     socket.on('new-fgcolor', function(data) {
+      if (!_writer) {
+        return;
+      }
       _fgColors[_room][_user_id] = data;
 
       socket.emit('new-fgcolor', _fgColors[_room]);
       socket.spark.room(_room).send('new-fgcolor', _fgColors[_room]);
     });
 
+    // When someone saves a drawing, that will increment the version of the
+    // room, so the current drawing is now always available.
+    socket.on('save', function() {
+      if (!_writer) {
+        return;
+      }
+      _versions[_room] = (_versions[_room] || 0) + 1;
+    });
+
     socket.on('clear', function() {
+      if (!_writer) { 
+        return;
+      }
+
       socket.spark.room(_room).send('clear');
       _strokes[_room] = [];
       _cleared_rooms[_room] = true;
       _versions[_room] = (_versions[_room] || 0) + 1;
-
-      console.log("VERSIONS ARE NOW", JSON.stringify(_versions));
     });
 
     socket.on('list-rooms', function(callback) {

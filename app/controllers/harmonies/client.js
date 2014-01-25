@@ -19,7 +19,6 @@ module.exports = {
   set_room: function(room, version, read_only) {
     this.room = room;
     client.set_room(room, version, read_only);
-    console.log("SETTING ROOM", room, version, read_only);
     // If we want to trigger all that socket junk...
     this.trigger("set_room");
   }
