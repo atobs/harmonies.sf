@@ -21,6 +21,7 @@ window.BACKGROUND_COLOR = [250, 250, 250];
 window.ZOOM = 1;
 window.MAX_ZOOM = 1.5;
 window.MIN_ZOOM = 0.5;
+window.CONTEXT = null;
 
 var brush, panStart = [],
 panCoords = [],
@@ -37,7 +38,6 @@ prevY = 0,
 container,
 foregroundColorSelector,
 backgroundColorSelector,
-menu,
 about,
 rooms,
 zoomin,
@@ -94,7 +94,7 @@ function init(container) {
     container.appendChild(bgcanvas);
     container.appendChild(canvas);
 
-    window.context = canvas.getContext("2d");
+    window.CONTEXT = canvas.getContext("2d");
 
     flattenCanvas = document.createElement("canvas");
     flattenCanvas.width = CANVAS_WIDTH;
@@ -110,8 +110,9 @@ function init(container) {
     backgroundColorSelector.addEventListener('change', onBackgroundColorSelectorChange, false);
     container.appendChild(backgroundColorSelector.container);
 
-    menu = new Menu();
-    menu.selector.addEventListener('change', onMenuSelectorChange, false);
+    window.MENU = new Menu();
+    window.MENU.selector.addEventListener('change', onMenuSelectorChange, false);
+    var menu = window.MENU;
 
     addClickListener(menu.foregroundColor, onMenuForegroundColor)
     addClickListener(menu.backgroundColor, onMenuBackgroundColor)
@@ -286,7 +287,7 @@ function onWindowKeyUp(event) {
 
     case 82:
         // r
-        changeBrush(menu.selector.selectedIndex);
+        changeBrush(window.MENU.selector.selectedIndex);
         break;
 
     case 66:
@@ -295,7 +296,7 @@ function onWindowKeyUp(event) {
         break;
     }
 
-    window.context.lineCap = BRUSH_SIZE == 1 ? 'butt' : 'round';
+    window.CONTEXT.lineCap = BRUSH_SIZE == 1 ? 'butt' : 'round';
 }
 
 function onWindowBlur(event) {
@@ -349,7 +350,7 @@ function changeBrush(i) {
     }
 
     newStroke = true;
-    brush = eval("new " + BRUSHES[i] + "(context)");
+    brush = eval("new " + BRUSHES[i] + "(window.CONTEXT)");
     brushName = BRUSHES[i];
 }
 
@@ -358,14 +359,14 @@ function changeBrush(i) {
 function onForegroundColorSelectorChange(event) {
     lastColor = COLOR = foregroundColorSelector.getColor();
 
-    menu.setForegroundColor(COLOR);
+    window.MENU.setForegroundColor(COLOR);
 
 }
 
 function onBackgroundColorSelectorChange(event) {
     BACKGROUND_COLOR = backgroundColorSelector.getColor();
 
-    menu.setBackgroundColor(BACKGROUND_COLOR);
+    window.MENU.setBackgroundColor(BACKGROUND_COLOR);
 
     document.body.style.backgroundColor = 'rgb(' + BACKGROUND_COLOR[0] + ', ' + BACKGROUND_COLOR[1] + ', ' + BACKGROUND_COLOR[2] + ')';
 
@@ -422,12 +423,12 @@ function onMenuBackgroundColor(_, moveToMouse) {
 }
 
 function onMenuSelectorChange() {
-    if (BRUSHES[menu.selector.selectedIndex] == "") return;
+    if (BRUSHES[window.MENU.selector.selectedIndex] == "") return;
 
 
-    changeBrush(menu.selector.selectedIndex);
+    changeBrush(window.MENU.selector.selectedIndex);
     if (isEraseModeOn) {
-      window.context.globalCompositeOperation = "destination-out";
+      window.CONTEXT.globalCompositeOperation = "destination-out";
     }
 
 }
@@ -450,7 +451,7 @@ function onMenuErase() {
     if (isEraseModeOn == true) {
         isEraseModeOn = false;
 
-        window.context.globalCompositeOperation = lastCompositeOperation;
+        window.CONTEXT.globalCompositeOperation = lastCompositeOperation;
         COLOR = lastColor;
 
         document.getElementById("erase").className = "button";
@@ -460,9 +461,9 @@ function onMenuErase() {
 
     //turn erase mode on
     isEraseModeOn = true;
-    lastCompositeOperation = window.context.globalCompositeOperation;
+    lastCompositeOperation = window.CONTEXT.globalCompositeOperation;
 
-    window.context.globalCompositeOperation = "destination-out";
+    window.CONTEXT.globalCompositeOperation = "destination-out";
     COLOR = [0,0,0];
 
 
@@ -543,21 +544,21 @@ function clearCanvas() {
     window.bgcanvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
     window.fgcanvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
 
-    changeBrush(menu.selector.selectedIndex);
+    changeBrush(window.MENU.selector.selectedIndex);
 }
 
 function onMenuBG() {
   if (isBackground) {
     isBackground = false;
 
-    window.context = fgcanvas.getContext("2d");
+    window.CONTEXT = fgcanvas.getContext("2d");
     brush.context = context;
     document.getElementById("bg-layer").className = "button";
     bgcanvas.style.opacity = "0.5";
     fgcanvas.style.opacity = "1";
   } else {
     isBackground = true;
-    window.context = bgcanvas.getContext("2d");
+    window.CONTEXT = bgcanvas.getContext("2d");
     brush.context = context;
     document.getElementById("bg-layer").className = "button selected";
 

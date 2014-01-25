@@ -33,23 +33,23 @@ module.exports = {
 
         var doWork = function() {
             var lastColor = COLOR;
-            var lastContext = window.context;
+            var lastContext = window.CONTEXT;
             if (bg) {
-              window.context = window.bgcanvas.getContext("2d");
+              window.CONTEXT = window.bgcanvas.getContext("2d");
             } else {
-              window.context = window.fgcanvas.getContext("2d");
+              window.CONTEXT = window.fgcanvas.getContext("2d");
             }
 
-            var lastCompositeOperation = window.context.globalCompositeOperation;
+            var lastCompositeOperation = window.CONTEXT.globalCompositeOperation;
             if (erase) {
-                window.context.globalCompositeOperation = "destination-out";
+                window.CONTEXT.globalCompositeOperation = "destination-out";
             } else {
-                window.context.globalCompositeOperation = "source-over";
+                window.CONTEXT.globalCompositeOperation = "source-over";
             }
 
             COLOR = color || COLOR;
 
-            newBrush.context = window.context;
+            newBrush.context = window.CONTEXT;
 
             for (var n = 0; i < coords.length && n < queue_size; i++, n++) {
                 curX += coords[i][0];
@@ -57,8 +57,8 @@ module.exports = {
                 newBrush.stroke(curX, curY);
             }
 
-            window.context.globalCompositeOperation = lastCompositeOperation;
-            window.context = lastContext;
+            window.CONTEXT.globalCompositeOperation = lastCompositeOperation;
+            window.CONTEXT = lastContext;
             COLOR = lastColor;
 
             if (i < coords.length) {
@@ -85,9 +85,9 @@ module.exports = {
             userBrushObj.destroy();
         }
 
-        var lastCompositeOperation = window.context.globalCompositeOperation;
-        var newBrushObj = eval("new " + brushName + "(context)");
-        window.context.globalCompositeOperation = lastCompositeOperation;
+        var lastCompositeOperation = window.CONTEXT.globalCompositeOperation;
+        var newBrushObj = eval("new " + brushName + "(window.CONTEXT)");
+        window.CONTEXT.globalCompositeOperation = lastCompositeOperation;
         userBrushes[user_id] = newBrushObj;
         newBrushObj.brushName = brushName;
         return newBrushObj;
@@ -123,8 +123,8 @@ module.exports = {
         userContainer.appendChild(userSwatch);
       }
 
-      menu.users.innerHTML = '';
-      menu.users.appendChild(userContainer);
+      window.MENU.users.innerHTML = '';
+      window.MENU.users.appendChild(userContainer);
     });
 
     socket.on('clear', function() {
