@@ -1,0 +1,11 @@
+window.circles = require("app/client/harmonies/brushes/circles");
+window.chrome = require("app/client/harmonies/brushes/chrome");
+window.fur = require("app/client/harmonies/brushes/fur");
+window.grid = require("app/client/harmonies/brushes/grid");
+window.longfur = require("app/client/harmonies/brushes/longfur");
+window.ribbon = require("app/client/harmonies/brushes/ribbon");
+window.shaded = require("app/client/harmonies/brushes/shaded");
+window.simple = require("app/client/harmonies/brushes/simple");
+window.sketchy = require("app/client/harmonies/brushes/sketchy");
+window.squares = require("app/client/harmonies/brushes/squares");
+window.web = require("app/client/harmonies/brushes/web");
