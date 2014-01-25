@@ -13,14 +13,14 @@ module.exports = {
   },
   socket: function(s) {
     this.do_when(this.room, "set_room", function() {
-      console.log("INSTALLING SOCKET");
       client.install(s);
     });
   },
-  set_room: function(room) {
+  set_room: function(room, version, read_only) {
     this.room = room;
-    client.set_room(room);
-    console.log("SETTING ROOM", room);
+    client.set_room(room, version, read_only);
+    console.log("SETTING ROOM", room, version, read_only);
+    // If we want to trigger all that socket junk...
     this.trigger("set_room");
   }
 };

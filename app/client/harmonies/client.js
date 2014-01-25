@@ -1,17 +1,25 @@
 var room = window.location.hash || "#default";
+var version;
+var read_only = false;
 
 module.exports = {
 
-  set_room: function(new_room) {
-    var self = this;
+  set_room: function(new_room, new_version, new_read_only) {
     room = new_room;
+    version = new_version;
+    read_only = new_read_only;
   },
 
   install: function(socket) {
-    this.socket = socket;
+    if (!read_only) {
+      socket.emit('join', {
+        room: room.toLowerCase()
+      });
+    }
 
-    socket.emit('join', {
-      room: room.toLowerCase()
+    socket.emit('history', {
+      room: room.toLowerCase(),
+      version: version
     });
 
     var userBrushes = {};
@@ -136,15 +144,5 @@ module.exports = {
     socket.on('clear', function() {
         window.clearCanvas();
     });
-
-    window.onload = function() {
-      // Constantly query the location hash for changes
-      var hashTimer = setInterval(function() {
-          if (window.location.hash && window.location.hash != room) {
-              window.location.reload();
-              clearTimeout(hashTimer);
-          }
-      }, 50);
-    }
   }
 }

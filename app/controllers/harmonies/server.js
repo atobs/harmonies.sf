@@ -16,10 +16,10 @@ var _strokes = { "default" : []};
 var _fgColors = { };
 var _bgColors = { };
 var _users = {};
-var _drawings = {};
+var _versions = {};
 
 var levelup = require("level");
-var db = levelup("harmonies.db");
+var db = levelup("harmonies.db", { valueEncoding: 'json' });
 
 
 
@@ -43,32 +43,40 @@ module.exports = {
   routes: {
     "/" : "index",
     "/:id/?" : "index",
+    "/:id/:version" : "index"
   },
 
   index: function(ctx, api) {
     api.template.add_stylesheet("harmonies.css");
     var room = ctx.req.params.id || "default";
-    api.bridge.controller("harmonies", "set_room", room);
+    var version = ctx.req.params.version;
+    var room_version = _versions[room] || 0;
+    if (version) {
+      version = parseInt(version, 10);
+    } else {
+      version = room_version;
+    }
+
+    var read_only = version !== room_version;
+
+    console.log("ROOM", room, "V", version, "RV", room_version, "RO", read_only);
+    api.bridge.controller("harmonies", "set_room", room, version, read_only);
     api.page.render({ socket: true, content: "" });
   },
 
   realtime: function() {
-    db.get('rooms', function(err, room_str) {
+    db.get('versions', function(err, versions) {
+      if (versions && !err) {
+        console.log("READ VERSIONS", JSON.stringify(versions));
+        _versions = versions;
+      }
+    });
+
+    db.get('rooms', function(err, rooms) {
       if (!err) {
-        var rooms;
-        try {
-          rooms = JSON.parse(room_str);
-        } catch(e) {
-          return;
-        }
-        
         _.each(rooms, function(room) {
-          db.get('room_' + room, function(err, stroke) {
-            try {
-              _strokes[room] = JSON.parse(stroke);
-            } catch(e) {
-              console.log("Trouble deserializing", room);
-            }
+          db.get('room_' + room, function(err, strokes) {
+            _strokes[room] = strokes;
           });
         });
       }
@@ -77,10 +85,12 @@ module.exports = {
     // Save the strokes to the DB
     setInterval(function() {
       _.each(_dirty_rooms, function(val, room) {
-        db.put('room_' + room, JSON.stringify(_strokes[room]), function(err) { });
+        db.put('room_' + room, _strokes[room]);
+        db.put('room_' + room + '_' + _versions[room], _strokes[room]);
       });
 
-      db.put('rooms', JSON.stringify(_.keys(_strokes)));
+      db.put('rooms', _.keys(_strokes));
+      db.put('versions', _versions);
 
       _dirty_rooms = {};
     }, 1000);
@@ -107,10 +117,12 @@ module.exports = {
     }, 10000);
 
     socket.on('join', function(data) {
-      console.log("JOINING", data);
       _room = data.room || "default";
       if (!_strokes[_room]) {
         _strokes[_room] = [];
+      }
+      if (!_versions[_room]) {
+        _versions[_room] = 0;
       }
 
       _users[_user_id] = _room;
@@ -134,10 +146,18 @@ module.exports = {
         socket.spark.room(_room).send('new-fgcolor', _fgColors[_room]);
       }
 
+    });
 
-      for (var i in _strokes[_room]) {
-        socket.emit('stroke', _strokes[_room][i]);
-      }
+    socket.on('history', function(data) {
+      _room = data.room || "default";
+      var room_key = "room_" + data.room + "_" + data.version;
+      db.get(room_key, function(err, strokes) {
+        if (!err) {
+          _.each(strokes, function(stroke) {
+            socket.emit('stroke', stroke);
+          });
+        }
+      });
     });
 
     socket.on('new-bgcolor', function(data){
@@ -158,13 +178,20 @@ module.exports = {
       socket.spark.room(_room).send('clear');
       _strokes[_room] = [];
       _cleared_rooms[_room] = true;
+      _versions[_room] = (_versions[_room] || 0) + 1;
+
+      console.log("VERSIONS ARE NOW", JSON.stringify(_versions));
     });
 
     socket.on('list-rooms', function(callback) {
-      var populatedRooms = {};
-      for (var user in _users) {
+      var populatedRooms = {
+        default: true,
+        gh: true
+      };
+
+      _.each(_users, function(user) {
         populatedRooms[_users[user]] = true;
-      }
+      });
 
       var rooms = Object.keys(populatedRooms);
 
