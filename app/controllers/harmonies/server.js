@@ -19,6 +19,20 @@ var _users = {};
 
 var socketMod = require_core("server/socket");
 
+var orm = require("orm");
+var db = orm.connect("sqlite://./drawings.sq3", function(err, db) {
+  var Drawing = db.define("drawing", {
+      strokes: Object,
+      room: String
+  });
+
+  var Room = db.define("room", {
+      name: String,
+      rev: Number
+  });
+});
+
+
 // This is an implementation of the Fisher-Yates algorithm, taken from
 // http://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
 function array_shuffle (aArray) {
@@ -28,6 +42,11 @@ function array_shuffle (aArray) {
         aArray[i] = aArray[j];
         aArray[j] = mTemp;
     }
+}
+
+// TODO: fill this stuff in
+function save_drawings() {
+
 }
 
 module.exports = {
@@ -40,6 +59,13 @@ module.exports = {
   index: function(ctx, api) {
     api.template.add_stylesheet("harmonies.css");
     api.page.render({ socket: true, content: "" });
+  },
+
+  realtime: function() {
+    // Save the strokes to the DB
+    setInterval(function() {
+      console.log("Saving drawings");
+    }, 10000);
   },
 
   socket: function(socket) {

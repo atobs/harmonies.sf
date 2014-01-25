@@ -4,7 +4,9 @@
     "version": "0.0.1",
     "private": true,
     "dependencies": {
-      "superfluous" : "x"
+      "superfluous" : "x",
+      "orm" : "x",
+      "sqlite3" : "x"
     },
     "scripts" : {
       "test" : "bash scripts/run_tests.sh",
