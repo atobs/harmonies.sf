@@ -5,8 +5,7 @@
     "private": true,
     "dependencies": {
       "superfluous" : "x",
-      "orm" : "x",
-      "sqlite3" : "x"
+      "supermarket" : "x"
     },
     "scripts" : {
       "test" : "bash scripts/run_tests.sh",

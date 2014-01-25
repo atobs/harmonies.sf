@@ -16,21 +16,11 @@ var _strokes = { "#default" : []};
 var _fgColors = { };
 var _bgColors = { };
 var _users = {};
+var _drawings = {};
 
-var socketMod = require_core("server/socket");
+var levelup = require("level");
+var db = levelup("harmonies.db");
 
-var orm = require("orm");
-var db = orm.connect("sqlite://./drawings.sq3", function(err, db) {
-  var Drawing = db.define("drawing", {
-      strokes: Object,
-      room: String
-  });
-
-  var Room = db.define("room", {
-      name: String,
-      rev: Number
-  });
-});
 
 
 // This is an implementation of the Fisher-Yates algorithm, taken from
@@ -44,10 +34,8 @@ function array_shuffle (aArray) {
     }
 }
 
-// TODO: fill this stuff in
-function save_drawings() {
-
-}
+var _dirty_rooms = {};
+var _cleared_rooms = {};
 
 module.exports = {
   // If the controller has assets in its subdirs, set is_package to true
@@ -62,10 +50,37 @@ module.exports = {
   },
 
   realtime: function() {
+    db.get('rooms', function(err, room_str) {
+      if (!err) {
+        var rooms;
+        try {
+          rooms = JSON.parse(room_str);
+        } catch(e) {
+          return;
+        }
+        
+        _.each(rooms, function(room) {
+          db.get('room_' + room, function(err, stroke) {
+            try {
+              _strokes[room] = JSON.parse(stroke);
+            } catch(e) {
+              console.log("Trouble deserializing", room);
+            }
+          });
+        });
+      }
+    });
+
     // Save the strokes to the DB
     setInterval(function() {
-      console.log("Saving drawings");
-    }, 10000);
+      _.each(_dirty_rooms, function(val, room) {
+        db.put('room_' + room, JSON.stringify(_strokes[room]), function(err) { });
+      });
+
+      db.put('rooms', JSON.stringify(_.keys(_strokes)));
+
+      _dirty_rooms = {};
+    }, 1000);
   },
 
   socket: function(socket) {
@@ -78,6 +93,7 @@ module.exports = {
 
         socket.spark.room(_room).send('stroke', data);
         _strokes[_room].push(data);
+        _dirty_rooms[_room] = true;
       }
     });
 
@@ -137,6 +153,7 @@ module.exports = {
     socket.on('clear', function() {
       socket.spark.room(_room).send('clear');
       _strokes[_room] = [];
+      _cleared_rooms[_room] = true;
     });
 
     socket.on('list-rooms', function(callback) {
