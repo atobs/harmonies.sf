@@ -13,7 +13,9 @@ function CheckIfMobile(){
             $('#main-menu').prependTo($firstDiv).hide();
             var toggled = false;
 
-            addClickListener($('#menu-toggle')[0], function() {
+            console.log("ADDING CLICK LISTENER MENU");
+            $('#menu-toggle').on("click", function() {
+              console.log("MENU TOGGLE CLICKED");
               if (toggled){
                   $('#menu-toggle').removeClass('btn-pushed').addClass('btn-up');
                   $('#main-menu').hide();

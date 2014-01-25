@@ -32,7 +32,6 @@ body
 select
 {
   text-transform: uppercase;
-  font-size: 1em;
   text-align: center;
 }
 hr
@@ -70,7 +69,6 @@ hr
   text-align: center;
   text-transform: uppercase;
   line-height: 1.5em;
-  font-size: 1em;
   cursor: default;
   z-index: 1;
 }
@@ -82,7 +80,6 @@ hr
     top: 4em;
     left: 50%;
     margin-left: -40%;
-    font-size: 1.5em;
   }
 }
 @media screen and (max-width: 960px){
@@ -107,7 +104,6 @@ hr
   margin: 0 .5em;
   float:left;
   cursor: pointer;
-  font-size: 1em;
 }
 
 .color-button{
@@ -117,7 +113,6 @@ hr
   width: 1.5em;
   height: 1.5em;
   cursor: pointer;
-  font-size: 1em;
 }
 @media screen and (max-width: 960px){
   .color-button{
@@ -136,25 +131,21 @@ hr
 #zoomControls {
   float:left;
   width: 70%;
-  font-size: 1em;
 }
 #zoomControls span{
   float:left;
-  font-size: 1em;
   
 }
 #menu-right{
   float:left;
   position:relative;
   width:30%;
-  font-size: 1em;
 }
 #rooms{
   float:right;
 }
 select#selector{
   float:left;
-  font-size: 1em;
   
 }
 
@@ -191,6 +182,7 @@ select#selector{
 .user-swatch:last-child{
   border-right: none;
 }
+
 #menu-toggle{
   width: 2em;
   height: 2em;
@@ -200,6 +192,7 @@ select#selector{
     -o-border-radius: 1.1em;
   border: .1em solid #aaaaaa;
   position: fixed;
+  z-index: 100;
   top: .25em;
   margin-top: .5em;
   left: 50%;
@@ -223,12 +216,10 @@ select#selector{
   #brushControls,
   #zoomControls {
     width: 100%;
-    font-size: 1em;
   }
   #menu-right{
     position:relative;
     width:100%;
-    font-size: 1em;
   }
 }
 
