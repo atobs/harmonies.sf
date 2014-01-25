@@ -41,7 +41,8 @@ module.exports = {
   // If the controller has assets in its subdirs, set is_package to true
   is_package: false,
   routes: {
-    "" : "index",
+    "/" : "index",
+    "/:id/?" : "index",
   },
 
   index: function(ctx, api) {
