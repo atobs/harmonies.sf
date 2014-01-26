@@ -17,9 +17,12 @@ var _fgColors = { };
 var _bgColors = { };
 var _users = {};
 var _versions = {};
+var _msgs = {};
 
 var levelup = require("level");
 var db = levelup("harmonies.db", { valueEncoding: 'json' });
+
+var MAX_MSGS = 50;
 
 
 
@@ -95,6 +98,12 @@ module.exports = {
       }
     });
 
+    db.get('msgs', function(err, msgs) {
+      if (!err && msgs) {
+        _msgs = msgs;
+      }
+    });
+
     db.get('rooms', function(err, rooms) {
       if (!err) {
         _.each(rooms, function(room) {
@@ -114,6 +123,7 @@ module.exports = {
 
       db.put('rooms', _.keys(_strokes));
       db.put('versions', _versions);
+      db.put('msgs', _msgs);
 
       _dirty_rooms = {};
     }, 1000);
@@ -127,6 +137,15 @@ module.exports = {
     socket.on('sendmsg', function(data) {
       data.color = _fgColors[_room][_user_id];
       data.user = _user_id;
+  
+      if (!_msgs[_room]) {
+        _msgs[_room] = [];
+      }
+
+      _msgs[_room].push(data);
+      if (_msgs[_room].length > MAX_MSGS) {
+        _msgs.shift();
+      }
 
       socket.emit("recvmsg", data);
       socket.broadcast.to(_room).emit("recvmsg", data);
@@ -157,6 +176,10 @@ module.exports = {
       _room = data.room || "default";
 
       console.log("JOINNIG", _users);
+
+      _.each(_msgs[_room], function(msg) {
+        socket.emit('recvmsg', msg);
+      });
 
       if (!_strokes[_room]) {
         _strokes[_room] = [];

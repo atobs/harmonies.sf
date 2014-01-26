@@ -9,6 +9,7 @@ module.exports = {
     chat_area.append(chat_toggle);
     chat_toggle.css("position", "absolute");
     chat_toggle.css("right", "10px");
+    chat_toggle.css("background-color", "#dedede");
 
     var hidden = false;
     if (window.SCREEN_WIDTH < 768) {
