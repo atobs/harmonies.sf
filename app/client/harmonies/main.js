@@ -154,7 +154,6 @@ function init(container) {
     document.addEventListener('touchend', touchHandlerDummy, false);
 
     document.addEventListener('mouseout', onDocumentMouseOut, false);
-    document.addEventListener('mouseout', onDocumentMouseOut, false);
 
     document.addEventListener("dragenter", onDocumentDragEnter, false);
     document.addEventListener("dragover", onDocumentDragOver, false);
@@ -205,10 +204,8 @@ function onWindowResize() {
 
     //menu.container.style.left = ((SCREEN_WIDTH - menu.container.offsetWidth) / 2) + 'px';
 
-    about.container.style.left = ((SCREEN_WIDTH - about.container.offsetWidth) / 2) + 'px';
     about.container.style.top = ((SCREEN_HEIGHT - about.container.offsetHeight) / 2) + 'px';
 
-    rooms.container.style.left = ((SCREEN_WIDTH - about.container.offsetWidth) / 2) + 'px';
     rooms.container.style.top = ((SCREEN_HEIGHT - about.container.offsetHeight) / 2) + 'px';
 }
 

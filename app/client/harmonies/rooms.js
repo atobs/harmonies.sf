@@ -30,7 +30,7 @@ Rooms.prototype = {
         container.innerHTML = '';
 
         var newRoom = document.createElement('div');
-        newRoom.innerHTML = 'new room'; 
+        newRoom.innerHTML = 'create a new room'; 
         var roomInput = document.createElement('input');
         roomInput.setAttribute('type', 'text');
         roomInput.style.marginLeft = "25px";
@@ -44,6 +44,8 @@ Rooms.prototype = {
 
         newRoom.appendChild(roomInput);
         container.appendChild(newRoom);
+
+        container.appendChild($("<hr />")[0]);
 
         // Add the room list.
         if (room_list.length > 0) {
@@ -60,6 +62,19 @@ Rooms.prototype = {
             container.style.visibility = 'visible';
           });
         }
+
+        container.appendChild($("<hr />")[0]);
+
+        // Add room list link
+        var allRoomLinks = $("<div>or </div>");
+        allRoomLinks.append(
+          $("<a />")
+            .html("See all rooms")
+            .attr("href", "/rooms")
+          );
+        container.appendChild(allRoomLinks[0]);
+
+
       });
 
     },
