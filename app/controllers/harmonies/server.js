@@ -37,6 +37,23 @@ function array_shuffle (aArray) {
 var _dirty_rooms = {};
 var _cleared_rooms = {};
 
+function getPopulatedRooms() {
+  var populatedRooms = {
+    default: 0,
+    gh: 0
+  };
+
+  console.log("USERS", _users);
+
+  _.each(_users, function(room, user) {
+    populatedRooms[room] = (populatedRooms[room] || 0) + 1;
+  });
+
+  console.log("POP ROOM", populatedRooms);
+
+  return populatedRooms;
+}
+
 module.exports = {
   // If the controller has assets in its subdirs, set is_package to true
   is_package: false,
@@ -130,6 +147,9 @@ module.exports = {
     socket.on('join', function(data) {
       _writer = true;
       _room = data.room || "default";
+
+      console.log("JOINNIG", _users);
+
       if (!_strokes[_room]) {
         _strokes[_room] = [];
       }
@@ -213,14 +233,7 @@ module.exports = {
     });
 
     socket.on('list-rooms', function(callback) {
-      var populatedRooms = {
-        default: true,
-        gh: true
-      };
-
-      _.each(_users, function(user) {
-        populatedRooms[_users[user]] = true;
-      });
+      var populatedRooms = getPopulatedRooms();
 
       var rooms = Object.keys(populatedRooms);
 
@@ -241,5 +254,6 @@ module.exports = {
       clearInterval(updateInterval);
     });
   },
-  versions: _versions
+  versions: _versions,
+  get_populated_rooms: getPopulatedRooms
 };

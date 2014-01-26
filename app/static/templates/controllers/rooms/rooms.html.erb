@@ -2,22 +2,25 @@
 <%= set_default("active_versions", {}) %>
 
 <div class="container">
-  <div class="row">
-    <div class="col-md-8">
-      <h1 ><b>rooms</b> </h1>
-    </div>
-  </div>
-
-  <div class="row col-md-12">
-    <% _.each(versions, function(ver, room) { %>
-      <div class="thumbnail col-md-2">
-        <h2>
-          <a href="<%= url_for("harmonies.index", { id: room}) %>"><%= room %></a>
-        </h2>
-        <h3>Pictures: <%= ver + 1 %> </h3>
+  <% if (!_.isEmpty(active_versions)) { %>
+    <div class="row">
+      <div class="col-md-8">
+        <h1 ><b>rooms</b> </h1>
       </div>
-    <% }) %>
-  </div>
+    </div>
+
+    <div class="row col-md-12">
+      <% _.each(active_versions, function(ver, room) { %>
+        <div class="thumbnail col-md-2">
+          <h2>
+            <a href="<%= url_for("harmonies.index", { id: room}) %>"><%= room %></a>
+          </h2>
+          <h3>Pictures: <%= versions[room] + 1 %> </h3>
+          <h3>People: <%= ver %> </h3>
+        </div>
+      <% }) %>
+    </div>
+  <% } %>
 
   <% if (!_.isEmpty(idle_versions)) { %>
     <div class="row">
