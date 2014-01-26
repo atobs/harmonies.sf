@@ -49,9 +49,9 @@ module.exports = {
             var lastColor = COLOR;
             var lastContext = window.CONTEXT;
             if (bg) {
-              window.CONTEXT = window.bgcanvas.getContext("2d");
+              window.CONTEXT = window.BGCANVAS.getContext("2d");
             } else {
-              window.CONTEXT = window.fgcanvas.getContext("2d");
+              window.CONTEXT = window.FGCANVAS.getContext("2d");
             }
 
             var lastCompositeOperation = window.CONTEXT.globalCompositeOperation;

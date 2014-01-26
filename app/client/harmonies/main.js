@@ -80,18 +80,18 @@ function init(container) {
      * wacom = document.embeds["wacom-plugin"];
      */
 
-    window.fgcanvas = canvas = document.createElement("canvas");
+    window.FGCANVAS = canvas = document.createElement("canvas");
     canvas.width = CANVAS_WIDTH;
     canvas.height = CANVAS_HEIGHT;
     canvas.setAttribute("id", "drawing");
     canvas.style.cursor = 'crosshair';
 
-    window.bgcanvas = document.createElement("canvas");
-    bgcanvas.width = CANVAS_WIDTH;
-    bgcanvas.height = CANVAS_HEIGHT;
-    bgcanvas.setAttribute("id", "drawing-bg");
+    window.BGCANVAS = document.createElement("canvas");
+    BGCANVAS.width = CANVAS_WIDTH;
+    BGCANVAS.height = CANVAS_HEIGHT;
+    BGCANVAS.setAttribute("id", "drawing-bg");
 
-    container.appendChild(bgcanvas);
+    container.appendChild(BGCANVAS);
     container.appendChild(canvas);
 
     window.CONTEXT = canvas.getContext("2d");
@@ -537,21 +537,21 @@ function PanCanvas() {
 
     canvas.style.zoom = ZOOM;
 
-    bgcanvas.style.transform = "translate(" + x + "px," + y + "px)";
-    bgcanvas.style.msTransform = "translate(" + x + "px," + y + "px)";
-    bgcanvas.style.webkitTransform = "translate(" + x + "px," + y + "px)";
-    bgcanvas.style.MozTransform = "translate(" + x + "px," + y + "px) scale(" + ZOOM +")";
-    bgcanvas.style.oTransform = "translate(" + x + "px," + y + "px)";
+    BGCANVAS.style.transform = "translate(" + x + "px," + y + "px)";
+    BGCANVAS.style.msTransform = "translate(" + x + "px," + y + "px)";
+    BGCANVAS.style.webkitTransform = "translate(" + x + "px," + y + "px)";
+    BGCANVAS.style.MozTransform = "translate(" + x + "px," + y + "px) scale(" + ZOOM +")";
+    BGCANVAS.style.oTransform = "translate(" + x + "px," + y + "px)";
 
-    bgcanvas.style.zoom = ZOOM;
+    BGCANVAS.style.zoom = ZOOM;
     origX = x;
     origY = y;
 }
 
 function clearCanvas() {
 
-    window.bgcanvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
-    window.fgcanvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    window.BGCANVAS.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    window.FGCANVAS.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
 
     changeBrush(window.MENU.selector.selectedIndex);
 }
@@ -560,19 +560,19 @@ function onMenuBG() {
   if (isBackground) {
     isBackground = false;
 
-    window.CONTEXT = fgcanvas.getContext("2d");
+    window.CONTEXT = FGCANVAS.getContext("2d");
     brush.context = window.CONTEXT;
     document.getElementById("bg-layer").className = "button";
-    bgcanvas.style.opacity = "0.5";
-    fgcanvas.style.opacity = "1";
+    BGCANVAS.style.opacity = "0.5";
+    FGCANVAS.style.opacity = "1";
   } else {
     isBackground = true;
-    window.CONTEXT = bgcanvas.getContext("2d");
+    window.CONTEXT = BGCANVAS.getContext("2d");
     brush.context = window.CONTEXT;
     document.getElementById("bg-layer").className = "button selected";
 
-    fgcanvas.style.opacity = "0.5";
-    bgcanvas.style.opacity = "1";
+    FGCANVAS.style.opacity = "0.5";
+    BGCANVAS.style.opacity = "1";
   }
 
   onMenuSelectorChange();
@@ -775,8 +775,8 @@ function flatten() {
 
     context.fillStyle = 'rgb(' + BACKGROUND_COLOR[0] + ', ' + BACKGROUND_COLOR[1] + ', ' + BACKGROUND_COLOR[2] + ')';
     context.fillRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(window.bgcanvas, 0, 0);
-    context.drawImage(window.fgcanvas, 0, 0);
+    context.drawImage(window.BGCANVAS, 0, 0);
+    context.drawImage(window.FGCANVAS, 0, 0);
 }
 
 function cleanPopUps() {
