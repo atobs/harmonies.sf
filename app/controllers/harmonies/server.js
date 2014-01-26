@@ -125,6 +125,9 @@ module.exports = {
     var _writer = false;
 
     socket.on('sendmsg', function(data) {
+      data.color = _fgColors[_room][_user_id];
+      data.user = _user_id;
+
       socket.emit("recvmsg", data);
       socket.broadcast.to(_room).emit("recvmsg", data);
     });

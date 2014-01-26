@@ -22,9 +22,13 @@ module.exports = {
     $("body").append(UI);
 
     s.on('recvmsg', function(data) {
-      console.log("Received MSG", data);
       var msgEl = $("<div />");
       msgEl.text(data.msg);
+      msgEl.data("user", data.user);
+      var color = data.color || [0,0,0];
+      var colorStr = 'rgb(' + color[0] + ', ' + color[1] + ', ' + color[2] + ')';
+
+      msgEl.css("color", colorStr);
       chat_area.append(msgEl);
     });
 

@@ -118,7 +118,7 @@ module.exports = {
 
     socket.on('new-bgcolor', function(data) {
         document.body.style.backgroundColor = 'rgb(' + data[0] + ', ' + data[1] + ', ' + data[2] + ')';
-        backgroundColorSelector.setColor(data);
+        window.backgroundColorSelector.setColor(data);
     });
 
     socket.on('new-fgcolor', function(data) {

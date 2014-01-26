@@ -107,6 +107,8 @@ function init(container) {
     container.appendChild(foregroundColorSelector.container);
 
     backgroundColorSelector = new ColorSelector(palette);
+    window.backgroundColorSelector = backgroundColorSelector;
+
     backgroundColorSelector.addEventListener('change', onBackgroundColorSelectorChange, false);
     container.appendChild(backgroundColorSelector.container);
 
