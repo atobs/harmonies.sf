@@ -124,6 +124,11 @@ module.exports = {
     var _room = "default";
     var _writer = false;
 
+    socket.on('sendmsg', function(data) {
+      socket.emit("recvmsg", data);
+      socket.broadcast.to(_room).emit("recvmsg", data);
+    });
+
     socket.on('stroke', function (data) {
       if (!_writer) {
         return;

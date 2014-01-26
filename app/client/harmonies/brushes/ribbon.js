@@ -16,7 +16,8 @@ ribbon.prototype =
 	init: function( context )
 	{
 		var scope = this;
-		
+	
+                console.log("CONTEXT IS", context);
 		this.context = context;
 		this.context.globalCompositeOperation = 'source-over';
 
@@ -36,18 +37,18 @@ ribbon.prototype =
 		{
 			var i;
 			
-			this.context.lineWidth = BRUSH_SIZE;			
-			this.context.strokeStyle = "rgba(" + COLOR[0] + ", " + COLOR[1] + ", " + COLOR[2] + ", " + 0.05 * BRUSH_PRESSURE + ")";
+			window.CONTEXT.lineWidth = BRUSH_SIZE;			
+			window.CONTEXT.strokeStyle = "rgba(" + COLOR[0] + ", " + COLOR[1] + ", " + COLOR[2] + ", " + 0.05 * BRUSH_PRESSURE + ")";
 			
 			for (i = 0; i < scope.painters.length; i++)
 			{
-				scope.context.beginPath();
-				scope.context.moveTo(scope.painters[i].dx, scope.painters[i].dy);		
+				window.CONTEXT.beginPath();
+				window.CONTEXT.moveTo(scope.painters[i].dx, scope.painters[i].dy);		
 
 				scope.painters[i].dx -= scope.painters[i].ax = (scope.painters[i].ax + (scope.painters[i].dx - scope.mouseX) * scope.painters[i].div) * scope.painters[i].ease;
 				scope.painters[i].dy -= scope.painters[i].ay = (scope.painters[i].ay + (scope.painters[i].dy - scope.mouseY) * scope.painters[i].div) * scope.painters[i].ease;
-				scope.context.lineTo(scope.painters[i].dx, scope.painters[i].dy);
-				scope.context.stroke();
+				window.CONTEXT.lineTo(scope.painters[i].dx, scope.painters[i].dy);
+				window.CONTEXT.stroke();
 			}
 		}
 	},

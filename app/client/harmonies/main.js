@@ -224,6 +224,11 @@ function onWindowResize() {
 function onWindowKeyDown(event) {
     if (modalDialogOpen) return;
 
+    var focused = $(":focus");
+    if (focused.length) {
+      return;
+    }
+
     switch (event.keyCode) {
     case 66:
         // b

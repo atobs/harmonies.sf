@@ -3,6 +3,7 @@
 require("app/client/harmonies/brush");
 var main = require("app/client/harmonies/main");
 var client = require("app/client/harmonies/client");
+var chat = require("app/client/harmonies/chat");
 
 module.exports = {
   events: {
@@ -14,6 +15,7 @@ module.exports = {
   socket: function(s) {
     this.do_when(this.room, "set_room", function() {
       client.install(s);
+      chat.install(s);
     });
   },
   set_room: function(room, version, read_only) {
