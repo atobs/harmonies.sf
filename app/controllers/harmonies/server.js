@@ -42,8 +42,12 @@ module.exports = {
   is_package: false,
   routes: {
     "/" : "index",
-    "/:id/?" : "index",
-    "/:id/:version" : "index"
+    "/:id" : "index",
+    "/:id/:version" : "index_ver"
+  },
+
+  index_ver: function(ctx, api) {
+    module.exports.index(ctx, api);
   },
 
   index: function(ctx, api) {
@@ -59,6 +63,8 @@ module.exports = {
 
     var read_only = version !== room_version;
 
+    this.set_fullscreen(true);
+
     api.bridge.controller("harmonies", "set_room", room, version, read_only);
     api.page.render({ socket: true, content: "" });
   },
@@ -68,6 +74,7 @@ module.exports = {
       if (versions && !err) {
         console.log("READ VERSIONS", JSON.stringify(versions));
         _versions = versions;
+        module.exports.versions = _versions;
       }
     });
 
@@ -233,5 +240,6 @@ module.exports = {
 
       clearInterval(updateInterval);
     });
-  }
+  },
+  versions: _versions
 };

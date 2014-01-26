@@ -35,6 +35,13 @@ Rooms.prototype = {
         roomInput.setAttribute('type', 'text');
         roomInput.style.marginLeft = "25px";
 
+        roomInput.addEventListener('change', function(event) {
+          var room_url = '/h/' + roomInput.value;
+          SF.go(room_url);
+          window.location.reload();
+        }, false);
+
+
         newRoom.appendChild(roomInput);
         container.appendChild(newRoom);
 
