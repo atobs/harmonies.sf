@@ -10,8 +10,8 @@ var About = require("app/client/harmonies/about");
 var Rooms = require("app/client/harmonies/rooms");
 
 // Globals ?
-window.SCREEN_WIDTH = window.innerWidth * 2;
-window.SCREEN_HEIGHT = window.innerHeight * 2;
+window.SCREEN_WIDTH = window.innerWidth;
+window.SCREEN_HEIGHT = window.innerHeight;
 window.CANVAS_WIDTH = 1000;
 window.CANVAS_HEIGHT = 1000;
 window.BRUSH_SIZE = 1;
@@ -164,8 +164,20 @@ function init(container) {
     canvas.addEventListener('touchmove', touchHandlerDummy, false);
     canvas.addEventListener('touchend', touchHandlerDummy, false);
 
+    // Center Canvases. Only happens at start.
+    centerCanvas();
+
     displayControls();
     onWindowResize(null);
+}
+
+function centerCanvas() {
+  var deltaX = SCREEN_WIDTH - CANVAS_WIDTH;
+  if (deltaX > 0) {
+    dX = deltaX / 2;
+    PanCanvas();
+  }
+
 }
 
 function touchHandlerDummy() {
