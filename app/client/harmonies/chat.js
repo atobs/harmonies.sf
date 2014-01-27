@@ -55,7 +55,13 @@ module.exports = {
 
     s.on('recvmsg', function(data) {
       var msgEl = $("<div />");
-      msgEl.text(data.msg);
+
+      if (data.server && data.html) {
+        msgEl.html(data.html);
+      } else {
+        msgEl.text(data.msg);
+      }
+
       msgEl.data("user", data.user);
       var color = data.color || [0,0,0];
       var colorStr = 'rgb(' + color[0] + ', ' + color[1] + ', ' + color[2] + ')';

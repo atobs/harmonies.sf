@@ -134,7 +134,32 @@ module.exports = {
     var _writer = false;
     var _nick = socket.session.nick;
 
-    function server_broadcast(msg) {
+    function server_perma_broadcast_html() {
+      var data = server_broadcast_html.apply(null, arguments);
+      _msgs[_room].push(data);
+    }
+
+    function server_broadcast_html() {
+      var msg = _.toArray(arguments).join(" ");
+      var data = {
+        html: msg,
+        user: -1,
+        color: [100,100,100],
+        server: true
+      };
+      socket.broadcast.to(_room).send("recvmsg", data);
+      socket.emit("recvmsg", data);
+
+      return data;
+    }
+
+    function server_perma_broadcast() {
+      var data = server_broadcast.apply(null, arguments);
+      _msgs[_room].push(data);
+    }
+
+    function server_broadcast() {
+      var msg = _.toArray(arguments).join(" ");
       var data = {
         msg: msg,
         user: -1,
@@ -144,9 +169,22 @@ module.exports = {
       socket.broadcast.to(_room).send("recvmsg", data);
       socket.emit("recvmsg", data);
 
+      return data;
+
     }
 
-    function server_msg(msg) {
+    function server_html() {
+      var msg = _.toArray(arguments).join(" ");
+      socket.emit("recvmsg", {
+        html: msg,
+        user: -1,
+        color: [100,100,100],
+        server: true
+      });
+    }
+
+    function server_msg() {
+      var msg = _.toArray(arguments).join(" ");
       socket.emit("recvmsg", {
         msg: msg,
         user: -1,
@@ -160,8 +198,16 @@ module.exports = {
     if (_nick) {
       server_msg("Welcome back, " + _nick);
     } else {
-      server_msg("Welcome. Use /help to see available commands");
+      server_msg("Welcome.");
+      server_msg("Type /help for help");
     }
+
+    var help = {
+      "/clear" : "Clears the current canvas. also gives everyone a chance to cancel",
+      "/nick" : "[nickname] - change your nick name",
+      "/cancel" : "Cancels the canvas clear. Use this to prevent accidents",
+      "/help" : "[command] - get help about a command"
+    };
 
     var handlers = {
       // Lists the commands available
@@ -170,7 +216,13 @@ module.exports = {
         server_msg(help_msg);
 
         _.each(_.keys(handlers), function(name) {
-          server_msg(name);
+          if (help[name]) {
+            var help_msg = _.template("<b><%= name %></b> <%= help[name] %>", {
+              name: name,
+              help: help
+            });
+            server_html(help_msg);
+          }
         });
       },
       "/clear" : function() {
@@ -183,6 +235,16 @@ module.exports = {
         }
       },
       "/nick" : function(name) {
+        if (!name) {
+          if (_nick) {
+            server_html("Your nick is ", _nick, ". Use <b>/nick [new name]</b> to change it");
+          } else {
+            server_html("Your don't have a nickname. Use <b>/nick [new name]</b> to change that");
+          }
+
+          return;
+        }
+
         _nick = name; 
         socket.session.nick = name;
         socket.session.save();
@@ -207,7 +269,15 @@ module.exports = {
           socket.spark.room(_room).send('clear');
           socket.emit('clear');
 
-          server_broadcast("Cleared canvas");
+          var room_clear_msg = _.template(
+            "cleared canvas, saved <a target=_blank href='/h/<%- room %>/<%- version %>'>#<%- version %></a>", 
+            {
+              room: _room,
+              version: _versions[room] || 0
+            }
+          );
+
+          server_perma_broadcast_html(room_clear_msg);
 
           _strokes[room] = [];
           _cleared_rooms[room] = true;
@@ -231,10 +301,6 @@ module.exports = {
       data.nick = _nick;
       data.user = _user_id;
       delete data.server;
-
-      if (!_msgs[_room]) {
-        _msgs[_room] = [];
-      }
 
       _msgs[_room].push(data);
       if (_msgs[_room].length > MAX_MSGS) {
@@ -290,6 +356,10 @@ module.exports = {
       if (!_versions[_room]) {
         _versions[_room] = 0;
       }
+      if (!_msgs[_room]) {
+        _msgs[_room] = [];
+      }
+
 
       _users[_user_id] = _room;
 
