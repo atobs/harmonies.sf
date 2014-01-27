@@ -349,6 +349,17 @@ module.exports = {
       var command = args.shift();
       if (handlers[command]) {
         handlers[command].apply(handlers[command], args);
+      } else {
+        // Only for use in limited situations...
+        if (command == "/version") {
+          var ver = parseInt(args[0]);
+          if (_.isNumber(ver) && !_.isNaN(ver)) {
+            server_msg("Setting", _room, "version to", args[0]);
+            _versions[_room] = ver;
+          } else {
+            server_msg(_room, "version is", _versions[_room]);
+          }
+        }
       }
     }
 

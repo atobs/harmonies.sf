@@ -70,9 +70,7 @@ module.exports = {
       }
 
       msgEl.data("user", data.user);
-      console.log("USER IS", data.user);
       var colorish = stringToColor(data.user);
-      console.log("COLOR ISSSSS", colorish);
       var color = data.color || [0,0,0];
       var colorStr = 'rgb(' + color[0] + ', ' + color[1] + ', ' + color[2] + ')';
 
