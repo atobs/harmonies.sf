@@ -460,6 +460,7 @@ function onMenuMouseOut() {
 function onMenuSave() {
     // window.open(canvas.toDataURL('image/png'),'mywindow');
     flatten();
+    SF.socket().emit("save");
     window.open(flattenCanvas.toDataURL('image/png'), 'mywindow');
 }
 

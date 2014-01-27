@@ -140,7 +140,7 @@ module.exports = {
 
   socket: function(socket) {
     var _user_id = getID();
-    var _user_hash = "u" + _user_id;
+    var _user_hash = "\\" + _user_id;
     var _room = "default";
     var _writer = false;
     var _nick = socket.session.nick;
@@ -239,22 +239,7 @@ module.exports = {
         });
       },
       "/save" : function() {
-        if (!_writer) {
-          return;
-        }
-
-        var room_clear_msg = _.template(
-          "<%- name %> saved <a target=_blank href='/h/<%- room %>/<%- version %>'>#<%- version %></a>", 
-          {
-            room: _room,
-            version: _versions[_room] || 0,
-            name: _nick || _user_hash
-          }
-        );
-
-        server_perma_broadcast_html(room_clear_msg);
-        _versions[_room] = (_versions[_room] || 0) + 1;
-
+        save_room();
       },
       "/clear" : function() {
         clear_room();
@@ -295,6 +280,24 @@ module.exports = {
       }
     };
 
+
+    function save_room() {
+      if (!_writer) {
+        return;
+      }
+
+      var room_clear_msg = _.template(
+        "<%- name %> saved <a target=_blank href='/h/<%- room %>/<%- version %>'>#<%- version %></a>", 
+        {
+          room: _room,
+          version: _versions[_room] || 0,
+          name: _nick || _user_hash
+        }
+      );
+
+      server_perma_broadcast_html(room_clear_msg);
+      _versions[_room] = (_versions[_room] || 0) + 1;
+    }
 
     function clear_room() {
       if (!_writer) { 
@@ -474,12 +477,7 @@ module.exports = {
     // When someone saves a drawing, that will increment the version of the
     // room, so the current drawing is now always available.
     socket.on('save', function() {
-      if (!_writer) {
-        return;
-      }
-      _versions[_room] = (_versions[_room] || 0) + 1;
-      _versions[_room] = (_versions[_room] || 0) + 1;
-      _dirty_rooms[_room] = true;
+      save_room();
     });
 
     socket.on('clear', clear_room);
