@@ -20,6 +20,7 @@ var _users = {};
 var _versions = {};
 var _topics = {};
 var _msgs = {};
+var _open_sockets = {};
 
 var CLEAR_TIMEOUT = 10;
 
@@ -147,6 +148,8 @@ module.exports = {
     var _room = DEFAULT_ROOM;
     var _writer = false;
     var _nick = socket.session.nick;
+
+    _open_sockets[_user_id] = (_open_sockets[_user_id] || 0) + 1
 
 
     function server_perma_broadcast_html() {
@@ -515,6 +518,13 @@ module.exports = {
     });
 
     socket.spark.on('end', function() {
+      _open_sockets[_user_id] = (_open_sockets[_user_id] || -1) - 1;
+      clearInterval(updateInterval);
+
+      if (_open_sockets[_user_id] > 0) {
+        return;
+      }
+
       if (_fgColors[_room] && _fgColors[_room][_user_id]) {
         delete _fgColors[_room][_user_id];
       }
@@ -522,9 +532,6 @@ module.exports = {
       if (_users[_user_id]) {
         delete _users[_user_id];
       }
-
-
-      clearInterval(updateInterval);
     });
   },
   versions: _versions,
