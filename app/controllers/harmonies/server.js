@@ -136,7 +136,7 @@ module.exports = {
       db.put('topics', _topics);
 
       _dirty_rooms = {};
-    }, 100);
+    }, 1000);
   },
 
   socket: function(socket) {
@@ -335,10 +335,11 @@ module.exports = {
           );
 
           server_perma_broadcast_html(room_clear_msg);
-
+          _dirty_rooms[room] = true;
           _strokes[room] = [];
-          _versions[room] = (_versions[room] || 0) + 1;
           delete _to_clear[room];
+          _versions[room] = (_versions[room] || 0) + 1;
+
         }
       }, CLEAR_TIMEOUT * 1000);
     }
