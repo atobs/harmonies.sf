@@ -60,6 +60,10 @@ module.exports = {
       var color = data.color || [0,0,0];
       var colorStr = 'rgb(' + color[0] + ', ' + color[1] + ', ' + color[2] + ')';
 
+      if (data.server) {
+        msgEl.prepend($("<b>Server:</b> "));
+      }
+
       msgEl.css("color", colorStr);
       chat_area.append(msgEl);
     });

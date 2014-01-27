@@ -19,6 +19,8 @@ var _users = {};
 var _versions = {};
 var _msgs = {};
 
+var CLEAR_TIMEOUT = 10;
+
 var levelup = require("level");
 var db = levelup("harmonies.db", { valueEncoding: 'json' });
 
@@ -39,6 +41,7 @@ function array_shuffle (aArray) {
 
 var _dirty_rooms = {};
 var _cleared_rooms = {};
+var _to_clear = {};
 
 function getPopulatedRooms() {
   var populatedRooms = {
@@ -134,10 +137,86 @@ module.exports = {
     var _room = "default";
     var _writer = false;
 
-    socket.on('sendmsg', function(data) {
+    function server_broadcast(msg) {
+      var data = {
+        msg: msg,
+        user: -1,
+        color: [100,100,100],
+        server: true
+      };
+      socket.broadcast.to(_room).send("recvmsg", data);
+      socket.emit("recvmsg", data);
+
+    }
+
+    function server_msg(msg) {
+      socket.emit("recvmsg", {
+        msg: msg,
+        user: -1,
+        color: [100,100,100],
+        server: true
+      });
+
+
+    }
+
+    var handlers = {
+      // Lists the commands available
+      "/help" : function() {
+        var help_msg = "Here's a help msg";
+        server_msg(help_msg);
+      },
+      "/clear" : function() {
+        clear_room();
+      },
+      "/cancel" : function() {
+        if (_to_clear[room]) {
+          delete _to_clear[_room];
+          server_broadcast("Canvas clear cancelled");
+        }
+      }
+    };
+
+
+    function clear_room() {
+      if (!_writer) { 
+        return;
+      }
+
+      _to_clear[_room] = true;
+      var room = _room;
+
+      console.log("CLEARING ROOM");
+      server_broadcast("Clearing the canvas in " + CLEAR_TIMEOUT + " seconds. " + 
+        "Use /cancel to prevent the canvas from clearing.");
+      setTimeout(function() {
+        if (_to_clear[room]) {
+          // Need to delay this by a few moments
+          socket.spark.room(_room).send('clear');
+          socket.emit('clear');
+
+          _strokes[room] = [];
+          _cleared_rooms[room] = true;
+          _versions[room] = (_versions[room] || 0) + 1;
+          delete _to_clear[room];
+        }
+      }, CLEAR_TIMEOUT * 1000);
+    }
+
+    function handle_command(data) {
+      var args = data.msg.split(" ");
+      var command = args.shift();
+      if (handlers[command]) {
+        handlers[command].apply(handlers[command], args);
+      }
+    }
+
+    function handle_message(data) {
+
       data.color = _fgColors[_room][_user_id];
       data.user = _user_id;
-  
+      delete data.server;
+
       if (!_msgs[_room]) {
         _msgs[_room] = [];
       }
@@ -149,6 +228,17 @@ module.exports = {
 
       socket.emit("recvmsg", data);
       socket.broadcast.to(_room).emit("recvmsg", data);
+
+    }
+
+    socket.on('sendmsg', function(data) {
+
+      if (data.msg[0] == '/') {
+        // Trying out a command
+        handle_command(data);
+      } else {
+        handle_message(data);
+      }
     });
 
     socket.on('stroke', function (data) {
@@ -198,7 +288,6 @@ module.exports = {
 
 
       socket.spark.join(_room);
-      socket.emit('clear');
 
       if (_bgColors[_room]) {
         socket.emit('new-bgcolor', _bgColors[_room]);
@@ -252,16 +341,7 @@ module.exports = {
       _versions[_room] = (_versions[_room] || 0) + 1;
     });
 
-    socket.on('clear', function() {
-      if (!_writer) { 
-        return;
-      }
-
-      socket.spark.room(_room).send('clear');
-      _strokes[_room] = [];
-      _cleared_rooms[_room] = true;
-      _versions[_room] = (_versions[_room] || 0) + 1;
-    });
+    socket.on('clear', clear_room);
 
     socket.on('list-rooms', function(callback) {
       var populatedRooms = getPopulatedRooms();
