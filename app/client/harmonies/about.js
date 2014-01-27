@@ -26,8 +26,10 @@ About.prototype = {
 
         text = document.createElement("p");
         text.style.textAlign = 'center';
-        text.innerHTML = 'Zoom: <span class="key">-</span> <span class="key">+</span> Pan: <span class="key">p</span><br />Brush: <span class="key">d</span><span class="key">f</span> size, <span class="key">r</span> reset<br />Color: <span class="key">c</span> wheel, <span class="key">Shift</span> picker<br />';
+        text.innerHTML = 'Zoom: <span class="key">-</span> <span class="key">+</span> Pan: <span class="key">p</span><br />Toggle BG Layer: <span class="key">b</span>, Reset Brush <span class="key">r</span><br />Color: <span class="key">c</span> wheel, <span class="key">Shift</span> picker<br />';
         containerText.appendChild(text);
+
+
 
         text = document.createElement("p");
         text.style.textAlign = 'center';

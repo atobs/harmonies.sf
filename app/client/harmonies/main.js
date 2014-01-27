@@ -705,6 +705,8 @@ function inputEnd() {
           stroke_data.bg = 1;
         }
 
+        stroke_data.brush_size = BRUSH_SIZE;
+
         SF.socket().emit('stroke', stroke_data);
 
 

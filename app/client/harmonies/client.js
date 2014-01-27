@@ -29,12 +29,12 @@ module.exports = {
     function nextStroke() {
         if (!midStroke && pendingStrokes.length > 0) {
             var data = pendingStrokes.shift();
-            traceStroke(data.brush, data.coords, data.color, data.erase, data.bg);
+            traceStroke(data.brush, data.coords, data.color, data.erase, data.bg, data.brush_size);
         }
     }
 
 
-    function traceStroke(newBrush, coords, color, erase, bg) {
+    function traceStroke(newBrush, coords, color, erase, bg, brush_size) {
         midStroke = true;
 
         var startCoords = coords.shift();
@@ -52,6 +52,11 @@ module.exports = {
               window.CONTEXT = window.BGCANVAS.getContext("2d");
             } else {
               window.CONTEXT = window.FGCANVAS.getContext("2d");
+            }
+
+            var old_brush_size = BRUSH_SIZE;
+            if (brush_size) {
+              BRUSH_SIZE = brush_size;
             }
 
             var lastCompositeOperation = window.CONTEXT.globalCompositeOperation;
@@ -73,7 +78,8 @@ module.exports = {
 
             window.CONTEXT.globalCompositeOperation = lastCompositeOperation;
             window.CONTEXT = lastContext;
-            COLOR = lastColor;
+            window.COLOR = lastColor;
+            window.BRUSH_SIZE = old_brush_size;
 
             if (i < coords.length) {
                 setTimeout(doWork, 20);
