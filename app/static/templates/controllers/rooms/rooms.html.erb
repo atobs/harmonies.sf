@@ -11,7 +11,7 @@
 
     <div class="row col-md-12">
       <% _.each(active_versions, function(ver, room) { %>
-        <div class="thumbnail col-md-2">
+        <div class="col-md-2">
           <h2>
             <a href="<%= url_for("harmonies.index", { id: room}) %>"><%= room %></a>
           </h2>
@@ -31,7 +31,7 @@
 
     <div class="row col-md-12">
       <% _.each(idle_versions, function(ver, room) { %>
-        <div class="thumbnail col-md-2">
+        <div class="col-md-2">
           <h2>
             <a href="<%= url_for("harmonies.index", { id: room}) %>"><%= room %></a>
           </h2>

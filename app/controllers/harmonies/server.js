@@ -17,6 +17,7 @@ var _fgColors = { };
 var _bgColors = { };
 var _users = {};
 var _versions = {};
+var _topics = {};
 var _msgs = {};
 
 var CLEAR_TIMEOUT = 10;
@@ -97,6 +98,12 @@ module.exports = {
       }
     });
 
+    db.get('topics', function(err, topics) {
+      if (!err && topics) {
+        _topics = topics;
+      }
+    });
+
     db.get('msgs', function(err, msgs) {
       if (!err && msgs) {
         _msgs = msgs;
@@ -123,6 +130,7 @@ module.exports = {
       db.put('rooms', _.keys(_strokes));
       db.put('versions', _versions);
       db.put('msgs', _msgs);
+      db.put('topics', _topics);
 
       _dirty_rooms = {};
     }, 1000);
@@ -130,6 +138,7 @@ module.exports = {
 
   socket: function(socket) {
     var _user_id = getID();
+    var _user_hash = "#" + _user_id;
     var _room = "default";
     var _writer = false;
     var _nick = socket.session.nick;
@@ -206,7 +215,8 @@ module.exports = {
       "/clear" : "Clears the current canvas. also gives everyone a chance to cancel",
       "/nick" : "[nickname] - change your nick name",
       "/cancel" : "Cancels the canvas clear. Use this to prevent accidents",
-      "/help" : "[command] - get help about a command"
+      "/help" : "[command] - get help about a command",
+      "/topic" : "[topic] - set the canvas topic"
     };
 
     var handlers = {
@@ -232,6 +242,18 @@ module.exports = {
         if (_to_clear[_room]) {
           delete _to_clear[_room];
           server_broadcast("Canvas clear cancelled");
+        }
+      },
+      "/topic" : function() {
+        var topic = _.toArray(arguments).join(" ");
+        var ver = _versions[_room];
+        _topics[_room][ver] = topic;
+
+        socket.emit("new-topic", topic);
+        if (!topic) {
+          server_broadcast(_nick || _user_hash, "delete the topic.");
+        } else {
+          server_broadcast(_nick || _user_hash, "changed the topic to", topic);
         }
       },
       "/nick" : function(name) {
@@ -270,7 +292,7 @@ module.exports = {
           socket.emit('clear');
 
           var room_clear_msg = _.template(
-            "cleared canvas, saved <a target=_blank href='/h/<%- room %>/<%- version %>'>#<%- version %></a>", 
+            "Cleared the canvas, saved <a target=_blank href='/h/<%- room %>/<%- version %>'>#<%- version %></a>", 
             {
               room: _room,
               version: _versions[room] || 0
@@ -359,6 +381,11 @@ module.exports = {
       if (!_msgs[_room]) {
         _msgs[_room] = [];
       }
+      if (!_topics[_room]) {    
+        _topics[_room] = {};
+      }
+
+
 
 
       _users[_user_id] = _room;
@@ -381,6 +408,9 @@ module.exports = {
         socket.spark.room(_room).send('new-fgcolor', _fgColors[_room]);
       }
 
+      if (_topics[_room][_versions[_room]]) {
+        server_msg("the topic is '" + _topics[_room][_versions[_room]] + "'");
+      }
     });
 
     socket.on('history', function(data) {
