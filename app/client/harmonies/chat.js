@@ -64,6 +64,15 @@ module.exports = {
         msgEl.prepend($("<b>[Server] </b> "));
       }
 
+      if (data.nick) {
+        msgEl.prepend(
+          $("<span /> ")
+            .text(data.nick)
+            .css("font-weight", "bold")
+            .css("margin-right", "10px")
+        );
+      }
+
       msgEl.css("color", colorStr);
       chat_area.append(msgEl);
     });

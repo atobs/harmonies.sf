@@ -136,6 +136,7 @@ module.exports = {
     var _user_id = getID();
     var _room = "default";
     var _writer = false;
+    var _nick;
 
     function server_broadcast(msg) {
       var data = {
@@ -163,8 +164,12 @@ module.exports = {
     var handlers = {
       // Lists the commands available
       "/help" : function() {
-        var help_msg = "Here's a help msg";
+        var help_msg = "Available commands:";
         server_msg(help_msg);
+
+        _.each(_.keys(handlers), function(name) {
+          server_msg(name);
+        });
       },
       "/clear" : function() {
         clear_room();
@@ -174,6 +179,9 @@ module.exports = {
           delete _to_clear[_room];
           server_broadcast("Canvas clear cancelled");
         }
+      },
+      "/nick" : function(name) {
+        _nick = name; 
       }
     };
 
@@ -186,7 +194,6 @@ module.exports = {
       _to_clear[_room] = true;
       var room = _room;
 
-      console.log("CLEARING ROOM");
       server_broadcast("Clearing the canvas in " + CLEAR_TIMEOUT + " seconds. " + 
         "Use /cancel to prevent the canvas from clearing.");
       setTimeout(function() {
@@ -216,6 +223,7 @@ module.exports = {
     function handle_message(data) {
 
       data.color = _fgColors[_room][_user_id];
+      data.nick = _nick;
       data.user = _user_id;
       delete data.server;
 
