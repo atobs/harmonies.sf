@@ -49,13 +49,9 @@ function getPopulatedRooms() {
     gh: 0
   };
 
-  console.log("USERS", _users);
-
   _.each(_users, function(room, user) {
     populatedRooms[room] = (populatedRooms[room] || 0) + 1;
   });
-
-  console.log("POP ROOM", populatedRooms);
 
   return populatedRooms;
 }
@@ -136,7 +132,7 @@ module.exports = {
     var _user_id = getID();
     var _room = "default";
     var _writer = false;
-    var _nick;
+    var _nick = socket.session.nick;
 
     function server_broadcast(msg) {
       var data = {
@@ -161,6 +157,12 @@ module.exports = {
 
     }
 
+    if (_nick) {
+      server_msg("Welcome back, " + _nick);
+    } else {
+      server_msg("Welcome. Use /help to see available commands");
+    }
+
     var handlers = {
       // Lists the commands available
       "/help" : function() {
@@ -182,6 +184,9 @@ module.exports = {
       },
       "/nick" : function(name) {
         _nick = name; 
+        socket.session.nick = name;
+        socket.session.save();
+        server_broadcast("#" + _user_id + " is now known as " + name);
       }
     };
 
@@ -274,8 +279,6 @@ module.exports = {
     socket.on('join', function(data) {
       _writer = true;
       _room = data.room || "default";
-
-      console.log("JOINNIG", _users);
 
       _.each(_msgs[_room], function(msg) {
         socket.emit('recvmsg', msg);
