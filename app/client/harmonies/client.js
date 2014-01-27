@@ -45,6 +45,7 @@ module.exports = {
 
         newBrush.strokeStart(startCoords);
 
+        var lastRun = Date.now();
         var doWork = function() {
             var lastColor = COLOR;
             var lastContext = window.CONTEXT;
@@ -78,11 +79,18 @@ module.exports = {
 
             window.CONTEXT.globalCompositeOperation = lastCompositeOperation;
             window.CONTEXT = lastContext;
-            window.COLOR = lastColor;
-            window.BRUSH_SIZE = old_brush_size;
+            COLOR = lastColor;
 
             if (i < coords.length) {
-                setTimeout(doWork, 20);
+                var delta = Date.now() - lastRun;
+                if (delta > 33) {
+                  setTimeout(function() {
+                    doWork();
+                    lastRun = Date.now();
+                  });
+                } else {
+                  doWork();
+                }
             } else {
                 newBrush.strokeEnd();
                 midStroke = false;
