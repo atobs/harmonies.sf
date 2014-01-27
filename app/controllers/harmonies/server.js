@@ -5,6 +5,7 @@ var controller = require_core("server/controller");
 var value_of = controller.value_of,
     array_of = controller.array_of;
     
+var crypto = require('crypto');
 
 var _id = 0;
 function getID() {
@@ -12,7 +13,7 @@ function getID() {
   return _id;
 }
 
-var _strokes = { "default" : []};
+var _strokes = { "main" : []};
 var _fgColors = { };
 var _bgColors = { };
 var _users = {};
@@ -26,6 +27,7 @@ var levelup = require("level");
 var db = levelup("harmonies.db", { valueEncoding: 'json' });
 
 var MAX_MSGS = 50;
+var DEFAULT_ROOM = "default";
 
 
 
@@ -45,6 +47,7 @@ var _to_clear = {};
 
 function getPopulatedRooms() {
   var populatedRooms = {
+    main: 0,
     default: 0,
     gh: 0
   };
@@ -71,11 +74,9 @@ module.exports = {
 
   index: function(ctx, api) {
     api.template.add_stylesheet("harmonies.css");
-    var room = ctx.req.params.id || "default";
+    var room = ctx.req.params.id || DEFAULT_ROOM;
     var version = ctx.req.params.version;
     var room_version = _versions[room] || 0;
-
-    console.log("VERSION IS", room_version);
 
     if (version) {
       version = parseInt(version, 10);
@@ -139,11 +140,14 @@ module.exports = {
   },
 
   socket: function(socket) {
-    var _user_id = getID();
+    var md5sum = crypto.createHash('md5');
+    md5sum.update(socket.sid);
+    var _user_id = md5sum.digest('hex').substr(0, 8);
     var _user_hash = "\\" + _user_id;
-    var _room = "default";
+    var _room = DEFAULT_ROOM;
     var _writer = false;
     var _nick = socket.session.nick;
+
 
     function server_perma_broadcast_html() {
       var data = server_broadcast_html.apply(null, arguments);
@@ -241,7 +245,14 @@ module.exports = {
       "/save" : function() {
         save_room();
       },
-      "/clear" : function() {
+      "/clear" : function(what) {
+        if (what === "chat") {
+          _msgs[_room] = "";
+          socket.broadcast.to(_room).emit("clearchat");
+          socket.emit("clearchat");
+          return;
+        }
+
         clear_room();
       },
       "/cancel" : function() {
@@ -389,7 +400,7 @@ module.exports = {
 
     socket.on('join', function(data) {
       _writer = true;
-      _room = data.room || "default";
+      _room = data.room || DEFAULT_ROOM;
 
       _.each(_msgs[_room], function(msg) {
         socket.emit('recvmsg', msg);
@@ -437,7 +448,7 @@ module.exports = {
     });
 
     socket.on('history', function(data) {
-      _room = data.room || "default";
+      _room = data.room || DEFAULT_ROOM;
       var room_key;
       if (data.version < _versions[_room]) {
         room_key = "room_" + data.room + "_" + data.version;

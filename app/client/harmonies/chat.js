@@ -1,3 +1,5 @@
+var stringToColor = require("app/client/harmonies/string_to_color");
+
 module.exports = {
   install: function(s) {
     var UI = $("<div class='chat_pane'/>");
@@ -53,6 +55,11 @@ module.exports = {
 
     $("body").append(UI);
 
+    s.on('clearchat', function(){ 
+      chat_area.empty();  
+      chat_area.append(chat_toggle);
+    });
+
     s.on('recvmsg', function(data) {
       var msgEl = $("<div />");
 
@@ -63,6 +70,9 @@ module.exports = {
       }
 
       msgEl.data("user", data.user);
+      console.log("USER IS", data.user);
+      var colorish = stringToColor(data.user);
+      console.log("COLOR ISSSSS", colorish);
       var color = data.color || [0,0,0];
       var colorStr = 'rgb(' + color[0] + ', ' + color[1] + ', ' + color[2] + ')';
 
@@ -70,12 +80,14 @@ module.exports = {
         msgEl.prepend($("<b>[Server] </b> "));
       }
 
-      if (data.nick) {
+      var nick = data.nick || data.user;
+      if (nick && !data.server) {
         msgEl.prepend(
           $("<span /> ")
-            .text(data.nick)
+            .text(nick)
             .css("font-weight", "bold")
             .css("margin-right", "10px")
+            .css("color", colorish)
         );
       }
 
