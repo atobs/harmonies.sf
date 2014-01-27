@@ -254,6 +254,7 @@ select#selector{
     overflow-y: auto;
     overflow-x: hidden;
     background-color: #fefefe;
+    padding-bottom: 70px;
   }
 
   input[type="text"] {
