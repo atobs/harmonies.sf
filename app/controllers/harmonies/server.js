@@ -41,7 +41,6 @@ function array_shuffle (aArray) {
 }
 
 var _dirty_rooms = {};
-var _cleared_rooms = {};
 var _to_clear = {};
 
 function getPopulatedRooms() {
@@ -75,13 +74,16 @@ module.exports = {
     var room = ctx.req.params.id || "default";
     var version = ctx.req.params.version;
     var room_version = _versions[room] || 0;
+
+    console.log("VERSION IS", room_version);
+
     if (version) {
       version = parseInt(version, 10);
     } else {
       version = room_version;
     }
 
-    var read_only = version !== room_version;
+    var read_only = version < room_version;
 
     this.set_fullscreen(true);
 
@@ -133,12 +135,12 @@ module.exports = {
       db.put('topics', _topics);
 
       _dirty_rooms = {};
-    }, 1000);
+    }, 100);
   },
 
   socket: function(socket) {
     var _user_id = getID();
-    var _user_hash = "#" + _user_id;
+    var _user_hash = "u" + _user_id;
     var _room = "default";
     var _writer = false;
     var _nick = socket.session.nick;
@@ -214,6 +216,7 @@ module.exports = {
     var help = {
       "/clear" : "Clears the current canvas. also gives everyone a chance to cancel",
       "/nick" : "[nickname] - change your nick name",
+      "/save" : "save this canvas for others to see",
       "/cancel" : "Cancels the canvas clear. Use this to prevent accidents",
       "/help" : "[command] - get help about a command",
       "/topic" : "[topic] - set the canvas topic"
@@ -234,6 +237,24 @@ module.exports = {
             server_html(help_msg);
           }
         });
+      },
+      "/save" : function() {
+        if (!_writer) {
+          return;
+        }
+
+        var room_clear_msg = _.template(
+          "<%- name %> saved <a target=_blank href='/h/<%- room %>/<%- version %>'>#<%- version %></a>", 
+          {
+            room: _room,
+            version: _versions[_room] || 0,
+            name: _nick || _user_hash
+          }
+        );
+
+        server_perma_broadcast_html(room_clear_msg);
+        _versions[_room] = (_versions[_room] || 0) + 1;
+
       },
       "/clear" : function() {
         clear_room();
@@ -270,7 +291,7 @@ module.exports = {
         _nick = name; 
         socket.session.nick = name;
         socket.session.save();
-        server_broadcast("#" + _user_id + " is now known as " + name);
+        server_broadcast(_user_hash + " is now known as " + name);
       }
     };
 
@@ -302,7 +323,6 @@ module.exports = {
           server_perma_broadcast_html(room_clear_msg);
 
           _strokes[room] = [];
-          _cleared_rooms[room] = true;
           _versions[room] = (_versions[room] || 0) + 1;
           delete _to_clear[room];
         }
@@ -415,7 +435,13 @@ module.exports = {
 
     socket.on('history', function(data) {
       _room = data.room || "default";
-      var room_key = "room_" + data.room + "_" + data.version;
+      var room_key;
+      if (data.version < _versions[_room]) {
+        room_key = "room_" + data.room + "_" + data.version;
+      } else {
+        room_key = "room_" + data.room;
+      }
+
       db.get(room_key, function(err, strokes) {
         if (!err) {
           _.each(strokes, function(stroke) {
@@ -452,6 +478,8 @@ module.exports = {
         return;
       }
       _versions[_room] = (_versions[_room] || 0) + 1;
+      _versions[_room] = (_versions[_room] || 0) + 1;
+      _dirty_rooms[_room] = true;
     });
 
     socket.on('clear', clear_room);
