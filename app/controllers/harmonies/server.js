@@ -170,7 +170,7 @@ module.exports = {
         clear_room();
       },
       "/cancel" : function() {
-        if (_to_clear[room]) {
+        if (_to_clear[_room]) {
           delete _to_clear[_room];
           server_broadcast("Canvas clear cancelled");
         }
@@ -194,6 +194,8 @@ module.exports = {
           // Need to delay this by a few moments
           socket.spark.room(_room).send('clear');
           socket.emit('clear');
+
+          server_broadcast("Cleared canvas");
 
           _strokes[room] = [];
           _cleared_rooms[room] = true;

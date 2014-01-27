@@ -61,7 +61,7 @@ module.exports = {
       var colorStr = 'rgb(' + color[0] + ', ' + color[1] + ', ' + color[2] + ')';
 
       if (data.server) {
-        msgEl.prepend($("<b>Server:</b> "));
+        msgEl.prepend($("<b>[Server] </b> "));
       }
 
       msgEl.css("color", colorStr);
