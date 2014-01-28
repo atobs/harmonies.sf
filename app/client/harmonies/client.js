@@ -17,6 +17,7 @@ module.exports = {
       });
     }
 
+
     socket.emit('history', {
       room: room.toLowerCase(),
       version: version

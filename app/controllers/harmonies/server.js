@@ -4,14 +4,8 @@ var controller = require_core("server/controller");
 // Helpers for serialized form elements
 var value_of = controller.value_of,
     array_of = controller.array_of;
-    
-var crypto = require('crypto');
 
-var _id = 0;
-function getID() {
-  _id += 1;
-  return _id;
-}
+var crypto = require('crypto');
 
 var _strokes = { "main" : []};
 var _fgColors = { };
@@ -152,7 +146,7 @@ module.exports = {
     var _user_hash = "\\" + md5sum.digest('hex').substr(0, 8);
 
     var _room = DEFAULT_ROOM;
-    var _writer = false;
+    var _writer = true;
     var _nick = socket.session.nick;
 
     _open_sockets[_user_hash] = (_open_sockets[_user_hash] || 0) + 1
@@ -219,20 +213,15 @@ module.exports = {
 
     }
 
-    if (_nick) {
-      server_msg("Welcome back, " + _nick);
-    } else {
-      server_msg("Welcome.");
-      server_msg("Type /help for help");
-    }
-
     var help = {
-      "/clear" : "Clears the current canvas. also gives everyone a chance to cancel",
+      "/pause" : "when you want to stop sharing your drawing skills",
+      "/resume" : "when you are ready to share your drawing skills",
       "/nick" : "[nickname] - change your nick name",
       "/save" : "save this canvas for others to see",
+      "/clear" : "Clears the current canvas. also gives everyone a chance to cancel",
       "/cancel" : "Cancels the canvas clear. Use this to prevent accidents",
       "/help" : "[command] - get help about a command",
-      "/topic" : "[topic] - set the canvas topic"
+      "/topic" : "[topic] - set the canvas topic",
     };
 
     var handlers = {
@@ -253,6 +242,24 @@ module.exports = {
       },
       "/save" : function() {
         save_room();
+      },
+      "/pause" : unready_room,
+      "/resume" : ready_room,
+      "/nick" : function(name) {
+        if (!name) {
+          if (_nick) {
+            server_html("Your nick is ", _nick, ". Use <b>/nick [new name]</b> to change it");
+          } else {
+            server_html("Your don't have a nickname. Use <b>/nick [new name]</b> to change that");
+          }
+
+          return;
+        }
+
+        _nick = name;
+        socket.session.nick = name;
+        socket.session.save();
+        server_broadcast(_user_hash + " is now known as " + name);
       },
       "/clear" : function(what) {
         if (what === "chat") {
@@ -282,22 +289,6 @@ module.exports = {
           server_broadcast(_nick || _user_hash, "changed the topic to", topic);
         }
       },
-      "/nick" : function(name) {
-        if (!name) {
-          if (_nick) {
-            server_html("Your nick is ", _nick, ". Use <b>/nick [new name]</b> to change it");
-          } else {
-            server_html("Your don't have a nickname. Use <b>/nick [new name]</b> to change that");
-          }
-
-          return;
-        }
-
-        _nick = name; 
-        socket.session.nick = name;
-        socket.session.save();
-        server_broadcast(_user_hash + " is now known as " + name);
-      }
     };
 
 
@@ -307,7 +298,7 @@ module.exports = {
       }
 
       var room_clear_msg = _.template(
-        "<%- name %> saved <a target=_blank href='/h/<%- room %>/<%- version %>'>#<%- version %></a>", 
+        "<%- name %> saved <a target=_blank href='/h/<%- room %>/<%- version %>'>#<%- version %></a>",
         {
           room: _room,
           version: _versions[_room] || 0,
@@ -319,15 +310,86 @@ module.exports = {
       _versions[_room] = (_versions[_room] || 0) + 1;
     }
 
+    function unready_room() {
+      _writer = false;
+      server_html("you are no longer drawing on this canvas, take some time to experiment until you <b>/resumse</b>");
+    }
+
+    function ready_room() {
+      _writer = true;
+
+      server_html("you are a drawer in this room, all your brush strokes will be shared until you <b>/pause</b>");
+    }
+
+    function join_room(data) {
+      _room = data.room || DEFAULT_ROOM;
+
+      _.each(_msgs[_room], function(msg) {
+        socket.emit('recvmsg', msg);
+      });
+
+      if (!_strokes[_room]) {
+        _strokes[_room] = [];
+      }
+      if (!_versions[_room]) {
+        _versions[_room] = 0;
+      }
+      if (!_msgs[_room]) {
+        _msgs[_room] = [];
+      }
+      if (!_topics[_room]) {
+        _topics[_room] = {};
+      }
+
+
+
+
+      _users[_user_hash] = _room;
+
+      if (!_fgColors[_room]) {
+        _fgColors[_room] = {};
+      }
+
+      _fgColors[_room][_user_hash] = [0,0,0];
+
+
+      socket.spark.join(_room);
+
+      if (_bgColors[_room]) {
+        socket.emit('new-bgcolor', _bgColors[_room]);
+      }
+
+      if (_fgColors[_room]) {
+        socket.emit('new-fgcolor', _fgColors[_room]);
+        socket.spark.room(_room).send('new-fgcolor', _fgColors[_room]);
+      }
+
+      if (_topics[_room][_versions[_room]]) {
+        server_msg("the topic is '" + _topics[_room][_versions[_room]] + "'");
+      }
+
+      if (_nick) {
+        server_msg("thanks for coming back, " + _nick);
+      } else {
+        server_msg("welcome to the drawering bored");
+        server_msg("type /help for help");
+      }
+
+      if (!_writer) {
+        server_html("pssst!! you can experiment and you won't affect the canvas for others until you type <b>/ready</b>");
+      }
+
+    }
+
     function clear_room() {
-      if (!_writer) { 
+      if (!_writer) {
         return;
       }
 
       _to_clear[_room] = true;
       var room = _room;
 
-      server_broadcast("Clearing the canvas in " + CLEAR_TIMEOUT + " seconds. " + 
+      server_broadcast("Clearing the canvas in " + CLEAR_TIMEOUT + " seconds. " +
         "Use /cancel to prevent the canvas from clearing.");
       setTimeout(function() {
         if (_to_clear[room]) {
@@ -336,7 +398,7 @@ module.exports = {
           socket.emit('clear');
 
           var room_clear_msg = _.template(
-            "Cleared the canvas, saved <a target=_blank href='/h/<%- room %>/<%- version %>'>#<%- version %></a>", 
+            "Cleared the canvas, saved <a target=_blank href='/h/<%- room %>/<%- version %>'>#<%- version %></a>",
             {
               room: _room,
               version: _versions[room] || 0
@@ -419,55 +481,7 @@ module.exports = {
       }
     }, 10000);
 
-    socket.on('join', function(data) {
-      _writer = true;
-      _room = data.room || DEFAULT_ROOM;
-
-      _.each(_msgs[_room], function(msg) {
-        socket.emit('recvmsg', msg);
-      });
-
-      if (!_strokes[_room]) {
-        _strokes[_room] = [];
-      }
-      if (!_versions[_room]) {
-        _versions[_room] = 0;
-      }
-      if (!_msgs[_room]) {
-        _msgs[_room] = [];
-      }
-      if (!_topics[_room]) {    
-        _topics[_room] = {};
-      }
-
-
-
-
-      _users[_user_hash] = _room;
-
-      if (!_fgColors[_room]) {
-        _fgColors[_room] = {};
-      }
-
-      _fgColors[_room][_user_hash] = [0,0,0];
-
-
-      socket.spark.join(_room);
-
-      if (_bgColors[_room]) {
-        socket.emit('new-bgcolor', _bgColors[_room]);
-      }
-
-      if (_fgColors[_room]) {
-        socket.emit('new-fgcolor', _fgColors[_room]);
-        socket.spark.room(_room).send('new-fgcolor', _fgColors[_room]);
-      }
-
-      if (_topics[_room][_versions[_room]]) {
-        server_msg("the topic is '" + _topics[_room][_versions[_room]] + "'");
-      }
-    });
-
+    socket.on('join', join_room);
     socket.on('history', function(data) {
       _room = data.room || DEFAULT_ROOM;
       var room_key;
