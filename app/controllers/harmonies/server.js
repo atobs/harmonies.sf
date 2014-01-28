@@ -143,13 +143,19 @@ module.exports = {
   socket: function(socket) {
     var md5sum = crypto.createHash('md5');
     md5sum.update(socket.sid);
+
     var _user_id = md5sum.digest('hex').substr(0, 8);
-    var _user_hash = "\\" + _user_id;
+
+    md5sum = crypto.createHash('md5');
+    md5sum.update(socket.sid);
+    md5sum.update("" + Date.now());
+    var _user_hash = "\\" + md5sum.digest('hex').substr(0, 8);
+
     var _room = DEFAULT_ROOM;
     var _writer = false;
     var _nick = socket.session.nick;
 
-    _open_sockets[_user_id] = (_open_sockets[_user_id] || 0) + 1
+    _open_sockets[_user_hash] = (_open_sockets[_user_hash] || 0) + 1
 
 
     function server_perma_broadcast_html() {
@@ -368,7 +374,7 @@ module.exports = {
 
     function handle_message(data) {
 
-      data.color = _fgColors[_room][_user_id];
+      data.color = _fgColors[_room][_user_hash];
       data.nick = _nick;
       data.user = _user_id;
       delete data.server;
@@ -437,13 +443,13 @@ module.exports = {
 
 
 
-      _users[_user_id] = _room;
+      _users[_user_hash] = _room;
 
       if (!_fgColors[_room]) {
         _fgColors[_room] = {};
       }
 
-      _fgColors[_room][_user_id] = [0,0,0];
+      _fgColors[_room][_user_hash] = [0,0,0];
 
 
       socket.spark.join(_room);
@@ -494,7 +500,7 @@ module.exports = {
       if (!_writer) {
         return;
       }
-      _fgColors[_room][_user_id] = data;
+      _fgColors[_room][_user_hash] = data;
 
       socket.emit('new-fgcolor', _fgColors[_room]);
       socket.spark.room(_room).send('new-fgcolor', _fgColors[_room]);
@@ -518,19 +524,18 @@ module.exports = {
     });
 
     socket.spark.on('end', function() {
-      _open_sockets[_user_id] = (_open_sockets[_user_id] || -1) - 1;
+      _open_sockets[_user_hash] = (_open_sockets[_user_hash] || -1) - 1;
       clearInterval(updateInterval);
-
-      if (_open_sockets[_user_id] > 0) {
+      if (_open_sockets[_user_hash] > 0) {
         return;
       }
 
-      if (_fgColors[_room] && _fgColors[_room][_user_id]) {
-        delete _fgColors[_room][_user_id];
+      if (_fgColors[_room] && _fgColors[_room][_user_hash]) {
+        delete _fgColors[_room][_user_hash];
       }
 
-      if (_users[_user_id]) {
-        delete _users[_user_id];
+      if (_users[_user_hash]) {
+        delete _users[_user_hash];
       }
     });
   },
