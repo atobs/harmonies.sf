@@ -495,7 +495,11 @@ module.exports = {
       if (_fgColors[_room]) {
         socket.emit('new-fgcolor', _fgColors[_room]);
       }
-    }, 10000);
+
+      if (_cursors[_room]) {
+        socket.emit('cursors', _cursors[_room], _user_hash);
+      }
+    }, 3000);
 
     socket.on('join', join_room);
     socket.on('history', function(data) {
@@ -564,6 +568,10 @@ module.exports = {
       clearInterval(updateInterval);
       if (_open_sockets[_user_hash] > 0) {
         return;
+      }
+
+      if (_cursors[_room] && _cursors[_room][_user_hash]) {
+        delete _cursors[_room][_user_hash];
       }
 
       if (_fgColors[_room] && _fgColors[_room][_user_hash]) {

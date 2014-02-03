@@ -164,6 +164,7 @@ module.exports = {
 
     var _cursors = {};
     var _dom_cursors = {};
+
     function draw_cursors() {
       _.each(_cursors, function(cursor) {
         // need to draw this cursor somewhere
@@ -189,6 +190,18 @@ module.exports = {
       });
     }
 
+    socket.on('cursors', function(cursors, user_id) { 
+      delete cursors[user_id];
+      _.each(_dom_cursors, function(cursor, key) {
+        if (!cursors[key] && cursor) {
+          cursor.remove();
+        }
+      });
+
+      _cursors = cursors;
+      draw_cursors();
+    });
+
     socket.on('move', function(data) {
       if (data.coords) {
         _cursors[data.user_id] = data;
@@ -203,4 +216,4 @@ module.exports = {
         window.clearCanvas();
     });
   }
-}
+};
