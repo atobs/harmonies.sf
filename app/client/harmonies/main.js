@@ -118,7 +118,6 @@ function init(container) {
 
     addClickListener(menu.foregroundColor, onMenuForegroundColor)
     addClickListener(menu.backgroundColor, onMenuBackgroundColor)
-    addClickListener(menu.save, onMenuSave)
     addClickListener(menu.clear, onMenuClear)
     addClickListener(menu.pan, onMenuPan)
     addClickListener(menu.erase, onMenuErase)

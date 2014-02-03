@@ -47,7 +47,6 @@ Menu.prototype = {
     foregroundColor: null,
     backgroundColor: null,
     selector: null,
-    save: null,
     clear: null,
     about: null,
     pan: null,
@@ -95,14 +94,6 @@ Menu.prototype = {
                     class: 'button',
                     parent: '#roomControls',
                     text: 'About',
-                    inmenu: true
-                },
-                save: {
-                    type: 'span',
-                    id: 'save',
-                    class: 'button',
-                    parent: '#roomControls',
-                    text: 'Save',
                     inmenu: true
                 },
                 clear: {
