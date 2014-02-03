@@ -136,24 +136,67 @@ module.exports = {
         window.backgroundColorSelector.setColor(data);
     });
 
+    var _colors = {};
+    var color_to_rgb = function(color) {
+      return 'rgb(' + color[0] + ', ' + color[1] + ', ' + color[2] + ')';
+    };
+
     socket.on('new-fgcolor', function(data) {
 
       var width = 100.0 / Object.keys(data).length;
       var userContainer = document.createElement("span");
 
       for (var user in data) {
-        var color = data[user];
+        var color = data[user].color;
         var userSwatch = document.createElement('span');
         userSwatch.style.display = "inline-block";
         userSwatch.style.width = width + "%";
         userSwatch.className = 'user-swatch';
+        _colors[user] = color;
 
-        userSwatch.style.backgroundColor = 'rgb(' + color[0] + ', ' + color[1] + ', ' + color[2] + ')';
+        userSwatch.style.backgroundColor = color_to_rgb(color);
         userContainer.appendChild(userSwatch);
       }
 
       window.MENU.users.innerHTML = '';
       window.MENU.users.appendChild(userContainer);
+    });
+
+    var _cursors = {};
+    var _dom_cursors = {};
+    function draw_cursors() {
+      _.each(_cursors, function(cursor) {
+        // need to draw this cursor somewhere
+        var cursorEl = _dom_cursors[cursor.user_id];
+        if (!_dom_cursors[cursor.user_id]) {
+          _dom_cursors[cursor.user_id] = $("<div class'pointer' />");
+          cursorEl = _dom_cursors[cursor.user_id];
+          $("body").append(cursorEl);
+          cursorEl.css({
+            width: "10px",
+            height: "10px",
+            opacity: "0.5"
+          });
+
+        }
+
+        cursorEl.css({
+          position: "fixed",
+          left: cursor.coords[0] / window.ZOOM,
+          top: cursor.coords[1] / window.ZOOM,
+          backgroundColor: color_to_rgb(_colors[cursor.user_id] || [0,0,0]),
+        });
+      });
+    }
+
+    socket.on('move', function(data) {
+      if (data.coords) {
+        _cursors[data.user_id] = data;
+      } else {
+        delete _cursors[data.user_id];
+      }
+
+      draw_cursors();
     });
 
     socket.on('clear', function() {

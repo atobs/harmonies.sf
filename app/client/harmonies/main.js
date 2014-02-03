@@ -1,6 +1,6 @@
 var REV = 6;
 
-window.BRUSHES = ["sketchy", "shaded", "chrome", "fur", "longfur", "web", "", "simple", "squares", "ribbon", "", "circles", "grid"];
+window.BRUSHES = ["simple", "sketchy", "shaded", "", "chrome", "fur", "longfur", "web", "", "squares", "circles", "grid"];
 window.USER_AGENT = navigator.userAgent.toLowerCase();
 
 var Palette =  require("app/client/harmonies/palette");
@@ -207,9 +207,20 @@ function zoomBy(amount) {
 
 // WINDOW
 
+var throttledMouseMove = _.throttle(function(event) {
+ 
+  SF.socket().emit("move", {
+    coords: [event.clientX / window.ZOOM, event.clientY / window.ZOOM]
+  });
+
+
+}, 50);
+
 function onWindowMouseMove(event) {
     mouseX = event.clientX;
     mouseY = event.clientY;
+
+    throttledMouseMove(event);
 }
 
 function onWindowResize() {
@@ -793,7 +804,7 @@ function cleanPopUps() {
     if (isFgColorSelectorVisible) {
         foregroundColorSelector.hide();
         isFgColorSelectorVisible = false;
-        SF.socket().emit('new-fgcolor', [COLOR[0], COLOR[1], COLOR[2]]);
+        SF.socket().emit('new-fgcolor', { color: [COLOR[0], COLOR[1], COLOR[2]] });
     }
 
     if (isBgColorSelectorVisible) {

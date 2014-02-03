@@ -12,6 +12,8 @@ var _fgColors = { };
 var _bgColors = { };
 var _users = {};
 var _versions = {};
+
+var _cursors = {};
 var _topics = {};
 var _msgs = {};
 var _open_sockets = {};
@@ -328,6 +330,10 @@ module.exports = {
         socket.emit('recvmsg', msg);
       });
 
+      if (!_cursors[_room]) {
+        _cursors[_room] = {};
+      }
+
       if (!_strokes[_room]) {
         _strokes[_room] = [];
       }
@@ -350,7 +356,7 @@ module.exports = {
         _fgColors[_room] = {};
       }
 
-      _fgColors[_room][_user_hash] = [0,0,0];
+      _fgColors[_room][_user_hash] = { color: [0,0,0], user_id: _user_hash };
 
 
       socket.spark.join(_room);
@@ -443,7 +449,7 @@ module.exports = {
 
       _msgs[_room].push(data);
       if (_msgs[_room].length > MAX_MSGS) {
-        _msgs.shift();
+        _msgs[_room].shift();
       }
 
       socket.emit("recvmsg", data);
@@ -461,13 +467,23 @@ module.exports = {
       }
     });
 
+    socket.on('move', function(data) {
+      if (data && data.coords && data.coords.length >= 1) {
+        data.user_id = _user_hash;
+
+        _cursors[_room][_user_hash] = data;
+        socket.spark.room(_room).send('move', data);
+      }
+      
+    });
+
     socket.on('stroke', function (data) {
       if (!_writer) {
         return;
       }
 
       if (data && data.coords && data.coords.length >= 1) {
-        data.user_id = _user_id;
+        data.user_id = _user_hash;
 
         socket.spark.room(_room).send('stroke', data);
         _strokes[_room].push(data);
@@ -514,6 +530,12 @@ module.exports = {
       if (!_writer) {
         return;
       }
+
+      data.user_id = _user_hash;
+      if (!_fgColors[_room]) {
+        _fgColors[_room] = {};
+      }
+
       _fgColors[_room][_user_hash] = data;
 
       socket.emit('new-fgcolor', _fgColors[_room]);

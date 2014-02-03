@@ -13,6 +13,14 @@ module.exports = {
     chat_toggle.css("right", "10px");
     chat_toggle.css("background-color", "#dedede");
 
+    function scroll_chat_area() {
+      // scroll to bottom
+      var height = chat_area[0].scrollHeight;
+      chat_area.scrollTop(height);
+    }
+
+    var throttled_scroll_chat_area = _.throttle(scroll_chat_area, 100);
+
     var hidden = false;
     if (window.SCREEN_WIDTH < 768) {
       hidden = true;
@@ -91,6 +99,9 @@ module.exports = {
 
       msgEl.css("color", colorStr);
       chat_area.append(msgEl);
+
+      throttled_scroll_chat_area();
+
     });
 
   }
