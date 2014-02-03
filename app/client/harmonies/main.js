@@ -22,13 +22,14 @@ window.ZOOM = 1;
 window.MAX_ZOOM = 1.5;
 window.MIN_ZOOM = 0.5;
 window.CONTEXT = null;
+window.DX = 0;
+window.DY = 0;
 
 var brush, panStart = [],
 panCoords = [],
 panOffset = [0, 0],
 strokeCoordinates = [],
-wacom, i, dX = 0,
-dY = 0,
+wacom, i,
 origX = 0,
 origY = 0,
 mouseX = 0,
@@ -175,7 +176,7 @@ function init(container) {
 function centerCanvas() {
   var deltaX = SCREEN_WIDTH - CANVAS_WIDTH;
   if (deltaX > 0) {
-    dX = deltaX / 2;
+    window.DX = deltaX / 2;
     PanCanvas();
   }
 
@@ -196,8 +197,8 @@ function zoomBy(amount) {
     } else if (ZOOM >= MAX_ZOOM) {
         ZOOM = MAX_ZOOM;
     } else {
-        dX = origX * ZOOM;
-        dY = origY * ZOOM;
+        window.DX = origX * ZOOM;
+        window.DY = origY * ZOOM;
     }
 
     PanCanvas();
@@ -207,9 +208,11 @@ function zoomBy(amount) {
 // WINDOW
 
 var throttledMouseMove = _.throttle(function(event) {
- 
+
+  var xScaled = parseInt((-window.DX + event.clientX) / ZOOM, 10);
+  var yScaled = parseInt((-window.DY + event.clientY) / ZOOM, 10);
   SF.socket().emit("move", {
-    coords: [event.clientX / window.ZOOM, event.clientY / window.ZOOM]
+    coords: [xScaled, yScaled]
   });
 
 
@@ -544,8 +547,8 @@ function onMenuRooms(){
 
 function PanCanvas() {
 
-    var x = parseInt(dX / ZOOM, 10);
-    var y = parseInt(dY / ZOOM, 10);
+    var x = parseInt(window.DX / ZOOM, 10);
+    var y = parseInt(window.DY / ZOOM, 10);
 
     canvas.style.transform = "translate(" + x + "px," + y + "px)";
     canvas.style.msTransform = "translate(" + x + "px," + y + "px)";
@@ -620,7 +623,7 @@ function onMenuJoin() {
 
 function inputStart(x, y) {
     if (panModeOn) {
-      panStart = [x - dX, y - dY];
+      panStart = [x - window.DX, y - window.DY];
 
       return;
     }
@@ -643,8 +646,8 @@ function inputStart(x, y) {
       BRUSH_PRESSURE = wacom && wacom.isWacom ? wacom.pressure : 1;
     }
 
-    var xScaled = parseInt((-dX + x) / ZOOM, 10);
-    var yScaled = parseInt((-dY + y) / ZOOM, 10);
+    var xScaled = parseInt((-window.DX + x) / ZOOM, 10);
+    var yScaled = parseInt((-window.DY + y) / ZOOM, 10);
 
     brush.strokeStart(xScaled, yScaled);
 
@@ -661,8 +664,8 @@ function inputContinue(x, y) {
 
     if (panModeOn) {
         panCoords = [x, y];
-        dX = panCoords[0] - panStart[0];
-        dY = panCoords[1] - panStart[1];
+        window.DX = panCoords[0] - panStart[0];
+        window.DY = panCoords[1] - panStart[1];
 
         PanCanvas();
 
@@ -676,8 +679,8 @@ function inputContinue(x, y) {
       BRUSH_PRESSURE = wacom && wacom.isWacom ? wacom.pressure : 1;
     }
 
-    var xScaled = parseInt((-dX + x) / ZOOM, 10);
-    var yScaled = parseInt((-dY + y) / ZOOM, 10);
+    var xScaled = parseInt((-window.DX + x) / ZOOM, 10);
+    var yScaled = parseInt((-window.DY + y) / ZOOM, 10);
 
     brush.stroke(xScaled, yScaled);
 
@@ -692,7 +695,7 @@ function inputContinue(x, y) {
 
 function inputEnd() {
     if (panModeOn) {
-        panOffset = [dX, dY];
+        panOffset = [window.DX, window.DY];
         return;
     }
 

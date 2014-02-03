@@ -181,10 +181,12 @@ module.exports = {
 
         }
 
+        var xScaled = parseInt((window.DX + cursor.coords[0]) / window.ZOOM, 10);
+        var yScaled = parseInt((window.DY + cursor.coords[1]) / window.ZOOM, 10);
         cursorEl.css({
           position: "fixed",
-          left: cursor.coords[0] / window.ZOOM,
-          top: cursor.coords[1] / window.ZOOM,
+          left: xScaled,
+          top: yScaled,
           backgroundColor: color_to_rgb(_colors[cursor.user_id] || [0,0,0]),
         });
       });
