@@ -324,6 +324,8 @@ module.exports = {
     }
 
     function join_room(data) {
+      _writer = true;
+
       _room = data.room || DEFAULT_ROOM;
 
       _.each(_msgs[_room], function(msg) {
@@ -380,11 +382,6 @@ module.exports = {
         server_msg("welcome to the drawering bored");
         server_msg("type /help for help");
       }
-
-      if (!_writer) {
-        server_html("pssst!! you can experiment and you won't affect the canvas for others until you type <b>/ready</b>");
-      }
-
     }
 
     function clear_room() {
