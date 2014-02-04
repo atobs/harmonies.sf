@@ -184,19 +184,36 @@ module.exports = {
             marginLeft: "-5px",
             marginTop: "-5px",
             height: "10px",
-            opacity: "0.5"
+            opacity: "0.3"
           });
 
         }
 
         var xScaled = parseInt(window.DX + (cursor.coords[0] * window.ZOOM), 10);
         var yScaled = parseInt(window.DY + (cursor.coords[1] * window.ZOOM), 10);
+
+
         cursorEl.css({
           position: "fixed",
           left: xScaled,
           top: yScaled,
           backgroundColor: color_to_rgb(_colors[cursor.user_id] || [0,0,0]),
         });
+
+        if (cursor.click) {
+          cursorEl.css("opacity", 0.8);
+          cursorEl.css("border", "1px solid black");
+        } else {
+          cursorEl.css("opacity", 0.3);
+          cursorEl.css("border", "1px solid gray");
+        }
+
+        var size = Math.max(cursor.size, 5);
+        cursorEl.css("width", size);
+        cursorEl.css("height", size);
+        cursorEl.css("marginLeft", -1 * size / 2);
+        cursorEl.css("marginTop", -1 * size / 2);
+
       });
     }
 

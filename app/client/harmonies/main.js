@@ -24,6 +24,7 @@ window.MIN_ZOOM = 0.5;
 window.CONTEXT = null;
 window.DX = 0;
 window.DY = 0;
+window.CLICKING = false;
 
 var brush, panStart = [],
 panCoords = [],
@@ -213,7 +214,9 @@ var throttledMouseMove = _.throttle(function(event) {
   var xScaled = parseInt((-window.DX + event.clientX) / ZOOM, 10);
   var yScaled = parseInt((-window.DY + event.clientY) / ZOOM, 10);
   SF.socket().emit("move", {
-    coords: [xScaled, yScaled]
+    coords: [xScaled, yScaled],
+    size: BRUSH_SIZE,
+    click: CLICKING
   });
 
 
@@ -660,6 +663,7 @@ function inputStart(x, y) {
 
     prevX = xScaled;
     prevY = yScaled;
+    CLICKING = true;
 }
 
 function inputContinue(x, y) {
@@ -701,6 +705,7 @@ function inputContinue(x, y) {
 function inputEnd() {
     if (panModeOn) {
         panOffset = [window.DX, window.DY];
+        CLICKING = false;
         return;
     }
 
@@ -731,6 +736,7 @@ function inputEnd() {
 
     newStroke = false;
     strokeCoordinates = null;
+    CLICKING = false;
 }
 
 // CANVAS
