@@ -470,6 +470,7 @@ module.exports = {
 
         _cursors[_room][_user_hash] = data;
         socket.spark.room(_room).send('move', data);
+        socket.emit('move', data);
       }
       
     });

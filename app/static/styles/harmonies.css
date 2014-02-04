@@ -29,6 +29,12 @@ body
   margin: 0px;
   overflow: hidden;
 }
+
+.pointer,
+.cursor {
+  z-index: -100;
+}
+
 select
 {
   text-transform: uppercase;

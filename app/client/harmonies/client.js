@@ -38,7 +38,7 @@ module.exports = {
     function traceStroke(newBrush, coords, color, erase, bg, brush_size) {
         midStroke = true;
 
-        var startCoords = coords.shift();
+        var startCoords = coords.shift(),
             i = 0,
             queue_size = 20,
             curX = startCoords[0],
@@ -75,6 +75,12 @@ module.exports = {
             for (var n = 0; i < coords.length && n < queue_size; i++, n++) {
                 curX += coords[i][0];
                 curY += coords[i][1];
+
+                if (coords[i].length > 3) {
+                  BRUSH_SIZE = coords[i][2];
+                  BRUSH_PRESSURE = coords[i][3];
+                }
+
                 newBrush.stroke(curX, curY);
             }
 
@@ -170,11 +176,13 @@ module.exports = {
         // need to draw this cursor somewhere
         var cursorEl = _dom_cursors[cursor.user_id];
         if (!_dom_cursors[cursor.user_id]) {
-          _dom_cursors[cursor.user_id] = $("<div class'pointer' />");
+          _dom_cursors[cursor.user_id] = $("<div class='pointer' />");
           cursorEl = _dom_cursors[cursor.user_id];
           $("body").append(cursorEl);
           cursorEl.css({
             width: "10px",
+            marginLeft: "-5px",
+            marginTop: "-5px",
             height: "10px",
             opacity: "0.5"
           });
@@ -183,7 +191,6 @@ module.exports = {
 
         var xScaled = parseInt(window.DX + (cursor.coords[0] * window.ZOOM), 10);
         var yScaled = parseInt(window.DY + (cursor.coords[1] * window.ZOOM), 10);
-        console.log(xScaled, yScaled);
         cursorEl.css({
           position: "fixed",
           left: xScaled,
@@ -194,7 +201,6 @@ module.exports = {
     }
 
     socket.on('cursors', function(cursors, user_id) { 
-      delete cursors[user_id];
       _.each(_dom_cursors, function(cursor, key) {
         if (!cursors[key] && cursor) {
           cursor.remove();

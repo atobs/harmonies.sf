@@ -69,17 +69,18 @@ function init(container) {
     document.body.style.backgroundRepeat = 'no-repeat';
     document.body.style.backgroundPosition = 'center center';
 
-    /*
-     * TODO: In some browsers a naste "Plugin Missing" window appears and people is getting confused.
-     * Disabling it until a better way to handle it appears.
-     *
-     * embed = document.createElement('embed');
-     * embed.id = 'wacom-plugin';
-     * embed.type = 'application/x-wacom-tablet';
-     * document.body.appendChild(embed);
-     *
-     * wacom = document.embeds["wacom-plugin"];
-     */
+    
+    // TODO: In some browsers a naste "Plugin Missing" window appears and people is getting confused.
+    // Disabling it until a better way to handle it appears.
+    
+    embed = $('<embed />');
+    embed.css("display", "none");
+    embed.attr("id",  'wacom-plugin');
+    embed.attr("type", 'application/x-wacom-tablet');
+    embed.appendTo($("body"));
+    
+    wacom = document.embeds["wacom-plugin"];
+    
 
     window.FGCANVAS = canvas = document.createElement("canvas");
     canvas.width = CANVAS_WIDTH;
@@ -267,6 +268,7 @@ function onWindowKeyDown(event) {
     case 68:
         // d
         if (BRUSH_SIZE > 1) BRUSH_SIZE--;
+        setCanvasCursor();
         break;
 
     case 69:
@@ -277,6 +279,7 @@ function onWindowKeyDown(event) {
     case 70:
         // f
         BRUSH_SIZE++;
+        setCanvasCursor();
         break;
 
     case 80:
@@ -402,7 +405,9 @@ function onBackgroundColorSelectorChange(event) {
 }
 
 
+// Need to also scale the cursor based on BRUSH_SIZE
 function setCanvasCursor() {
+  
   if (panModeOn) {
     canvas.style.cursor = 'move';
   } else if (isEraseModeOn) {
@@ -651,7 +656,7 @@ function inputStart(x, y) {
 
     brush.strokeStart(xScaled, yScaled);
 
-    strokeCoordinates = [[xScaled, yScaled]];
+    strokeCoordinates = [[xScaled, yScaled, BRUSH_SIZE, BRUSH_PRESSURE]];
 
     prevX = xScaled;
     prevY = yScaled;
@@ -686,7 +691,7 @@ function inputContinue(x, y) {
 
 
     if (strokeCoordinates) {
-      strokeCoordinates.push([xScaled - prevX, yScaled - prevY]);
+      strokeCoordinates.push([xScaled - prevX, yScaled - prevY, BRUSH_SIZE, BRUSH_PRESSURE]);
     }
 
     prevX = xScaled;
@@ -722,8 +727,6 @@ function inputEnd() {
         stroke_data.brush_size = BRUSH_SIZE;
 
         SF.socket().emit('stroke', stroke_data);
-
-
     }
 
     newStroke = false;
