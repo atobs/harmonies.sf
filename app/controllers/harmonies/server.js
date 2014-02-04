@@ -148,7 +148,7 @@ module.exports = {
     var _user_hash = "\\" + md5sum.digest('hex').substr(0, 8);
 
     var _room = DEFAULT_ROOM;
-    var _writer = true;
+    var _writer = false;
     var _nick = socket.session.nick;
 
     _open_sockets[_user_hash] = (_open_sockets[_user_hash] || 0) + 1
