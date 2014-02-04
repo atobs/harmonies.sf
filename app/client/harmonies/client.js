@@ -181,8 +181,9 @@ module.exports = {
 
         }
 
-        var xScaled = parseInt((window.DX + cursor.coords[0]) * window.ZOOM, 10);
-        var yScaled = parseInt((window.DY + cursor.coords[1]) * window.ZOOM, 10);
+        var xScaled = parseInt(window.DX + (cursor.coords[0] * window.ZOOM), 10);
+        var yScaled = parseInt(window.DY + (cursor.coords[1] * window.ZOOM), 10);
+        console.log(xScaled, yScaled);
         cursorEl.css({
           position: "fixed",
           left: xScaled,
