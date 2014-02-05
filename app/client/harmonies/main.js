@@ -221,7 +221,7 @@ var throttledMouseMove = _.throttle(function(event) {
   });
 
 
-}, 50);
+}, 100);
 
 function onWindowMouseMove(event) {
     mouseX = event.clientX;

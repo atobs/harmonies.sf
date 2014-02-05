@@ -185,7 +185,7 @@ module.exports = {
             marginLeft: "-5px",
             marginTop: "-5px",
             height: "10px",
-            opacity: "0.3",
+            opacity: "0.5",
             position: "fixed"
           });
 
@@ -198,23 +198,23 @@ module.exports = {
           cursorEl.css("opacity", 0.8);
           cursorEl.css("border", "1px solid black");
         } else {
-          cursorEl.css("opacity", 0.3);
+          cursorEl.css("opacity", 0.5);
           cursorEl.css("border", "1px solid gray");
         }
 
         var size = Math.max(cursor.size, 5);
         cursorEl.css({
-          width: size,
-          height: size,
-          marginLeft: -1 * size / 2,
-          marginTop: -1 * size / 2,
           backgroundColor: color_to_rgb(_colors[cursor.user_id] || [0,0,0])
         });
 
-        cursorEl.stop(true, true).animate({
+        cursorEl.stop(true).animate({
+          marginLeft: -1 * size / 2,
+          marginTop: -1 * size / 2,
+          width: size,
+          height: size,
           left: xScaled,
           top: yScaled
-        }, 100);
+        }, 200);
 
       });
     }
@@ -241,6 +241,6 @@ module.exports = {
         window.clearCanvas();
     });
 
-    setInterval(draw_cursors, 50);
+    setInterval(draw_cursors, 100);
   }
 };
