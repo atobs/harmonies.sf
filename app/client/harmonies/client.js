@@ -40,7 +40,7 @@ module.exports = {
 
         var startCoords = coords.shift(),
             i = 0,
-            queue_size = 20,
+            queue_size = 10,
             curX = startCoords[0],
             curY = startCoords[1];
 
