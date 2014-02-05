@@ -544,7 +544,6 @@ function onMenuPan() {
 
 function onMenuClear() {
     if (confirm("Are you sure you want to clear the canvas?")) {
-      clearCanvas();
       SF.socket().emit('clear');
     }
 }
