@@ -105,6 +105,7 @@ module.exports = {
             }
 
             COLOR = lastColor;
+            BRUSH_SIZE = old_brush_size;
 
         };
 
@@ -226,7 +227,6 @@ module.exports = {
       });
 
       _cursors = cursors;
-      draw_cursors();
     });
 
     socket.on('move', function(data) {
@@ -235,12 +235,12 @@ module.exports = {
       } else {
         delete _cursors[data.user_id];
       }
-
-      draw_cursors();
     });
 
     socket.on('clear', function() {
         window.clearCanvas();
     });
+
+    setInterval(draw_cursors, 50);
   }
 };

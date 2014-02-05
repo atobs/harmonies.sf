@@ -213,6 +213,7 @@ var throttledMouseMove = _.throttle(function(event) {
 
   var xScaled = parseInt((-window.DX + event.clientX) / ZOOM, 10);
   var yScaled = parseInt((-window.DY + event.clientY) / ZOOM, 10);
+
   SF.socket().emit("move", {
     coords: [xScaled, yScaled],
     size: BRUSH_SIZE,
@@ -248,6 +249,11 @@ function onWindowKeyDown(event) {
       return;
     }
 
+    var mouseEvent = {
+      clientX: mouseX,
+      clientY: mouseY
+    };
+
     switch (event.keyCode) {
     case 66:
         // b
@@ -271,7 +277,8 @@ function onWindowKeyDown(event) {
     case 68:
         // d
         if (BRUSH_SIZE > 1) BRUSH_SIZE--;
-        setCanvasCursor();
+
+        throttledMouseMove(mouseEvent);
         break;
 
     case 69:
@@ -282,7 +289,7 @@ function onWindowKeyDown(event) {
     case 70:
         // f
         BRUSH_SIZE++;
-        setCanvasCursor();
+        throttledMouseMove(mouseEvent);
         break;
 
     case 80:
