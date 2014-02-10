@@ -40,7 +40,7 @@ module.exports = {
 
         var startCoords = coords.shift(),
             i = 0,
-            queue_size = 5,
+            queue_size = 20,
             curX = startCoords[0],
             curY = startCoords[1];
 
@@ -94,7 +94,7 @@ module.exports = {
                   setTimeout(function() {
                     doWork();
                     lastRun = Date.now();
-                  });
+                  }, 10);
                 } else {
                   doWork();
                 }
