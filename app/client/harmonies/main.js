@@ -308,7 +308,6 @@ function onWindowKeyDown(event) {
         zoomBy(-0.1);
         break;
 
-
     }
 }
 
@@ -331,6 +330,11 @@ function onWindowKeyUp(event) {
         // r
         changeBrush(window.MENU.selector.selectedIndex);
         break;
+
+    case 192:
+        window.parent.postMessage("tilde", "*");
+        break;
+
 
     case 66:
         // b
