@@ -272,3 +272,9 @@ select#selector{
   right: 0px;
   top: 0px;
 }
+
+.tripcolor {
+  display: inline-block;
+  width: 20px;
+  height: 10px;
+}

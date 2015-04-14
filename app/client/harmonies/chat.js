@@ -1,5 +1,7 @@
 var stringToColor = require("app/client/harmonies/string_to_color");
 
+var tripcode = require("app/client/tripcode");
+
 module.exports = {
   install: function(s) {
     var UI = $("<div class='chat_pane'/>");
@@ -52,14 +54,14 @@ module.exports = {
 
     form.append(textinput);
 
-    form.on("submit", function(evt) {
+    form.on("submit", _.throttle(function(evt) {
       evt.preventDefault();
       s.emit("sendmsg", { 
         msg: textinput.val()
       });
 
       textinput.val("");
-    });
+    }, 100));
 
     $("body").append(UI);
 
@@ -88,13 +90,17 @@ module.exports = {
 
       var nick = data.nick || data.user;
       if (nick && !data.server) {
-        msgEl.prepend(
-          $("<span /> ")
-            .text(nick)
-            .css("font-weight", "bold")
-            .css("margin-right", "10px")
-            .css("color", colorish)
-        );
+        var nickEl = $("<span /> ")
+          .css("font-weight", "bold")
+          .css("margin-right", "10px")
+          .css("color", colorish);
+
+        nickEl.data("tripcode", window.md5(nick));
+        nickEl.css("width", "100px");
+        nickEl.css("display", "inline-block");
+        nickEl.css("margin-top", "10px");
+        tripcode.gen_tripcode(nickEl);
+        msgEl.prepend(nickEl);
       }
 
       msgEl.css("color", colorStr);

@@ -449,7 +449,6 @@ module.exports = {
         _msgs[_room].shift();
       }
 
-      socket.emit("recvmsg", data);
       socket.broadcast.to(_room).emit("recvmsg", data);
 
     }
