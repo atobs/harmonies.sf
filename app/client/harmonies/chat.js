@@ -12,7 +12,8 @@ module.exports = {
 
     chat_area.append(chat_toggle);
     chat_toggle.css("position", "absolute");
-    chat_toggle.css("right", "10px");
+    chat_toggle.css("right", "50%");
+    chat_toggle.css("zIndex", "1000");
     chat_toggle.css("background-color", "#dedede");
 
     function scroll_chat_area() {
@@ -32,10 +33,12 @@ module.exports = {
 
     function redraw_controls() {
       if (hidden) {
-        UI.css("width", "100px");
+        UI.addClass("smaller");
+        UI.removeClass("larger");
         chat_toggle.html("show chat");
       } else {
-        UI.css("width", "300px");
+        UI.addClass("larger");
+        UI.removeClass("smaller");
         chat_toggle.html("hide chat");
       }
 
@@ -71,7 +74,7 @@ module.exports = {
     });
 
     s.on('recvmsg', function(data) {
-      var msgEl = $("<div />");
+      var msgEl = $("<div class='chat_msg' />");
 
       if (data.server && data.html) {
         msgEl.html(data.html);

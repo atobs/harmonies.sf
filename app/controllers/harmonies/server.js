@@ -60,7 +60,7 @@ module.exports = {
   // If the controller has assets in its subdirs, set is_package to true
   is_package: false,
   routes: {
-    "/" : "index",
+    "" : "index",
     "/:id" : "index",
     "/:id/:version" : "index_ver"
   },
@@ -84,6 +84,7 @@ module.exports = {
     var read_only = version < room_version;
 
     this.set_fullscreen(true);
+
 
     api.bridge.controller("harmonies", "set_room", room, version, read_only);
     api.page.render({ socket: true, content: "" });

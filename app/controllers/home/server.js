@@ -6,8 +6,7 @@ module.exports = {
   },
 
   index: function(ctx, api) {
-    var template_str = api.template.render("controllers/home.html.erb");
-    api.page.render({ content: template_str});
+    ctx.res.redirect("/h/default");
   },
 
   socket: function() {}
