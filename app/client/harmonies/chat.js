@@ -10,6 +10,25 @@ module.exports = {
     var chat_area = $("<div class='chat_area'/>");
     var chat_toggle = $("<div class='pam'>hide chat</div>");
 
+    var about = $("<div id='about'>ABOUT</div>");
+    var users = $("<div id='user_list'></div>");
+    UI.append(about);
+    UI.append(users);
+    about.css({
+      position: "absolute",
+      top: 0,
+      left: 5,
+      zIndex: 10,
+      backgroundColor: "#aaa",
+      padding: "5px",
+      cursor: "pointer"
+    });
+    about.on("click", function() { 
+      bootloader.require(["app/client/harmonies/main"], function(mod) {
+        mod.showAboutMenu();
+      });
+    });
+
     chat_area.append(chat_toggle);
     chat_toggle.css("position", "absolute");
     chat_toggle.css("right", "50%");
@@ -24,10 +43,7 @@ module.exports = {
 
     var throttled_scroll_chat_area = _.throttle(scroll_chat_area, 100);
 
-    var hidden = false;
-    if (window.SCREEN_WIDTH < 768) {
-      hidden = true;
-    }
+    var hidden = true;
 
     chat_toggle.css("cursor", "pointer");
 

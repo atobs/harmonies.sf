@@ -165,8 +165,8 @@ module.exports = {
         userContainer.appendChild(userSwatch);
       }
 
-      window.MENU.users.innerHTML = '';
-      window.MENU.users.appendChild(userContainer);
+      $("#user_list").empty();
+      $("#user_list").append(userContainer);
     });
 
     var _cursors = {};

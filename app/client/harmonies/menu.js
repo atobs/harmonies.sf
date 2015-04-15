@@ -49,13 +49,11 @@ Menu.prototype = {
     selector: null,
     clear: null,
     about: null,
-    pan: null,
     erase: null,
-    rooms: null,
     join: null,
+    panLabel: null,
     zoomin: null,
     zoomout: null,
-    users: null,
     layerbg: null,
 
     init: function() {
@@ -114,7 +112,7 @@ Menu.prototype = {
                 },
                 
                 layerbg: {
-                    type:'span',
+                    type:'div',
                     id: 'bg-layer',
                     class: 'button',
                     parent: '#brushControls',
@@ -146,7 +144,7 @@ Menu.prototype = {
                     inmenu: true
                 },
                 erase: {
-                    type: 'span',
+                    type: 'div',
                     id: 'erase',
                     class: 'button',
                     parent: '#brushControls',
@@ -161,32 +159,32 @@ Menu.prototype = {
                     text: '',
                     inmenu: false
                 },
-                pan: {
-                    type: 'span',
-                    id: 'pan',
-                    class: 'button',
-                    parent: '#menu-right',
-                    text: 'Pan',
-                    inmenu: true
-                },
                 zoomout: {
-                    type: 'span',
+                    type: 'div',
                     id: 'zoomout',
                     class: 'button',
                     parent: '#zoomControls',
                     text: '-',
                     inmenu: true
                 },
-                zoomLabel: {
-                    type: 'span',
-                    id: '',
-                    class: '',
-                    parent: '#zoomControls',
-                    text: 'Zoom',
-                    inmenu: false
+                drawLabel: {
+                  type: 'div',
+                  id: 'drawLabel',
+                  parent: "#zoomControls",
+                  text: 'Draw',
+                  class: 'button',
+                  inmenu: true
+                },
+                panLabel: {
+                  type: 'div',
+                  id: 'panLabel',
+                  parent: "#zoomControls",
+                  text: 'Pan',
+                  class: 'button',
+                  inmenu: true
                 },
                 zoomin: {
-                    type: 'span',
+                    type: 'div',
                     id: 'zoomin',
                     class: 'button',
                     parent: '#zoomControls',
@@ -194,22 +192,6 @@ Menu.prototype = {
                     inmenu: true
                 },
                 
-                rooms: {
-                    type: 'span',
-                    id: 'rooms',
-                    class: 'button',
-                    parent: '#menu-right',
-                    text: 'Room',
-                    inmenu: true
-                },
-                users: {
-                    type: 'div',
-                    id: 'user_list',
-                    class: '',
-                    parent: '#main-menu',
-                    text: '',
-                    inmenu: true
-                }
             };
         
         
@@ -248,10 +230,7 @@ Menu.prototype = {
                 .text(BRUSHES[i].toUpperCase())
                 .appendTo('#selector');
         }
-        //hide roomControls
-        $('#roomControls').hide();
-        //hide zoomControls
-        $('#zoomControls').hide();
+
         
         
         //if mobile adjust gui

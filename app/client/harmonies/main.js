@@ -55,7 +55,7 @@ isMenuMouseOver = false,
 modalDialogOpen = false,
 colorKeyIsDown = false,
 pickerKeyIsDown = false,
-panModeOn = false,
+panModeOn = true,
 isEraseModeOn = false,
 isRoomsOpen = false,
 newStroke = false,
@@ -122,13 +122,13 @@ function init(container) {
     addClickListener(menu.foregroundColor, onMenuForegroundColor)
     addClickListener(menu.backgroundColor, onMenuBackgroundColor)
     addClickListener(menu.clear, onMenuClear)
-    addClickListener(menu.pan, onMenuPan)
     addClickListener(menu.erase, onMenuErase)
+    addClickListener(menu.panLabel, onMenuPan)
+    addClickListener(menu.drawLabel, onMenuDraw)
     addClickListener(menu.zoomin, onMenuZoomIn)
     addClickListener(menu.zoomout, onMenuZoomOut)
     addClickListener(menu.about, onMenuAbout)
     addClickListener(menu.join, onMenuJoin)
-    addClickListener(menu.rooms, onMenuRooms)
     addClickListener(menu.layerbg, onMenuBG)
     menu.container.addEventListener('mouseover', onMenuMouseOver, false);
     menu.container.addEventListener('mouseout', onMenuMouseOut, false);
@@ -173,6 +173,8 @@ function init(container) {
 
     displayControls();
     onWindowResize(null);
+
+    setupPanning();
 }
 
 function centerCanvas() {
@@ -527,22 +529,31 @@ function onMenuZoomIn(){
 function onMenuZoomOut(){
     zoomBy(-0.1);
 }
-function onMenuPan() {
-    if (panModeOn == true) {
-        //turn pan mode off
-        panModeOn = false;
-        document.getElementById("pan").className = "button";
-        panCoords = null;
-        panStart = null;
-        setCanvasCursor();
-    } else {
-      //turn pan mode on
-      panModeOn = true;
-      document.getElementById("pan").className = "button selected";
-      setCanvasCursor();
-    }
 
-    displayControls();
+function onMenuDraw() {
+    panModeOn = false;
+    setupPanning();
+}
+
+function onMenuPan() {
+    panModeOn = !panModeOn;
+    setupPanning();
+}
+
+function setupPanning() {
+  if (panModeOn == false) {
+      document.getElementById("panLabel").className = "button";
+      document.getElementById("drawLabel").className = "button selected";
+      panCoords = null;
+      panStart = null;
+      setCanvasCursor();
+  } else {
+    document.getElementById("panLabel").className = "button selected";
+    document.getElementById("drawLabel").className = "button";
+    setCanvasCursor();
+  }
+
+  displayControls();
 
 }
 
@@ -855,19 +866,8 @@ function cleanPopUps() {
 
 function displayControls() {
     if (isRoomsOpen) {
-      document.getElementById('pan').style.display = 'none';
       document.getElementById('roomControls').style.display = 'inline-block';
-      document.getElementById('zoomControls').style.display = 'none';
-      document.getElementById('brushControls').style.display = 'none';
-    } else if (panModeOn) {
-      document.getElementById('pan').style.display = 'inline-block';
-      document.getElementById('roomControls').style.display = 'none';
       document.getElementById('zoomControls').style.display = 'inline-block';
-      document.getElementById('brushControls').style.display = 'none';
-    } else {
-      document.getElementById('pan').style.display = 'inline-block';
-      document.getElementById('roomControls').style.display = 'none';
-      document.getElementById('zoomControls').style.display = 'none';
       document.getElementById('brushControls').style.display = 'inline-block';
     }
 }
@@ -875,5 +875,6 @@ function displayControls() {
 window.clearCanvas = clearCanvas;
 
 module.exports = {
-  init: init
+  init: init,
+  showAboutMenu: onMenuAbout
 };
