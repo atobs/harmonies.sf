@@ -39,6 +39,7 @@ module.exports = {
       } else {
         UI.addClass("larger");
         UI.removeClass("smaller");
+        chat_area.scrollTop(chat_area.prop("scrollHeight"));
         chat_toggle.html("hide chat");
       }
 
